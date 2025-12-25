@@ -4,6 +4,7 @@ import com.energy.management.dto.auth.LoginRequest;
 import com.energy.management.dto.auth.LoginResponse;
 import com.energy.management.dto.request.RegisterRequest;
 import com.energy.management.entity.User;
+import com.energy.management.enums.UserRole;
 import com.energy.management.exception.BusinessException;
 import com.energy.management.repository.UserRepository;
 import com.energy.management.security.JwtTokenProvider;
@@ -65,13 +66,8 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
     
-    private String getRoleLabel(User.UserRole role) {
-        if (role == User.UserRole.ADMIN) {
-            return "管理员";
-        } else if (role == User.UserRole.USER) {
-            return "普通用户";
-        }
-        return role.name();
+    private String getRoleLabel(UserRole role) {
+        return role.getLabel();
     }
 
     @Override
@@ -96,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
-        user.setRole(User.UserRole.USER);
+        user.setRole(UserRole.USER);
         
         userRepository.save(user);
         log.info("用户注册成功: {}", user.getUsername());

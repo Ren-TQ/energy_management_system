@@ -1,6 +1,7 @@
 package com.energy.management.repository;
 
 import com.energy.management.entity.Meter;
+import com.energy.management.enums.DeviceStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,13 +20,14 @@ public interface MeterRepository extends JpaRepository<Meter, Long> {
 
     List<Meter> findByBuildingId(Long buildingId);
 
-    List<Meter> findByActiveTrue();
+    List<Meter> findByStatus(DeviceStatus status);
 
-    @Query("SELECT m FROM Meter m WHERE m.building.id = :buildingId AND m.roomNumber = :roomNumber AND m.active = true")
-    Optional<Meter> findActiveMeterByBuildingAndRoom(
+    @Query("SELECT m FROM Meter m WHERE m.building.id = :buildingId AND m.roomNumber = :roomNumber AND m.status = :status")
+    Optional<Meter> findMeterByBuildingAndRoomAndStatus(
             @Param("buildingId") Long buildingId,
-            @Param("roomNumber") String roomNumber
+            @Param("roomNumber") String roomNumber,
+            @Param("status") DeviceStatus status
     );
     
-    boolean existsByBuildingIdAndRoomNumberAndActiveTrue(Long buildingId, String roomNumber);
+    boolean existsByBuildingIdAndRoomNumberAndStatus(Long buildingId, String roomNumber, DeviceStatus status);
 }

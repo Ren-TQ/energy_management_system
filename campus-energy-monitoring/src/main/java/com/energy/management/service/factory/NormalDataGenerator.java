@@ -25,7 +25,7 @@ public class NormalDataGenerator implements DataGenerator {
         double voltage = generateNormalVoltage();
 
         // 生成功率
-        double power = generatePower(meter.getPowerThreshold(), isDaytime);
+        double power = generatePower(meter.getRatedPower(), isDaytime);
 
         // 根据物理公式 P = U×I 计算电流
         double current = power / voltage;

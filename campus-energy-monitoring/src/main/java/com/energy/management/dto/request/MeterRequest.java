@@ -1,6 +1,6 @@
 package com.energy.management.dto.request;
 
-import com.energy.management.entity.Meter;
+import com.energy.management.enums.DeviceStatus;
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 @Data
 public class MeterRequest {
     @NotBlank(message = "设备名称不能为空")
-    private String deviceName;
+    private String name;
 
     @NotBlank(message = "设备序列号不能为空")
     private String serialNumber;
@@ -20,9 +20,9 @@ public class MeterRequest {
     private String roomNumber;
 
     @NotNull(message = "功率阈值不能为空")
-    private Double powerThreshold;
+    private Double ratedPower;
     
-    private Meter.DeviceStatus status = Meter.DeviceStatus.ONLINE;
+    private DeviceStatus status = DeviceStatus.ONLINE;
     
-    private boolean active = true;
+    private String usageDescription;
 }

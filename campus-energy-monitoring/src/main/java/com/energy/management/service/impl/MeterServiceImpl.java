@@ -41,21 +41,23 @@ public class MeterServiceImpl implements MeterService {
                 .orElseThrow(() -> new BusinessException("指定的建筑不存在"));
 
         // Pattern: Business Rule - 检查同一建筑下房间号是否已存在有效设备
-        if (meterRepository.existsByBuildingIdAndRoomNumberAndActiveTrue(
-                request.getBuildingId(), request.getRoomNumber())) {
+        if (meterRepository.existsByBuildingIdAndRoomNumberAndStatus(
+                request.getBuildingId(), request.getRoomNumber(), com.energy.management.enums.DeviceStatus.ONLINE)) {
             throw new BusinessException("该建筑下房间号已存在有效设备");
         }
 
         Meter meter = new Meter();
-        meter.setDeviceName(request.getDeviceName());
+        meter.setName(request.getName());
         meter.setSerialNumber(request.getSerialNumber());
-        meter.setPowerThreshold(request.getPowerThreshold());
+        meter.setRatedPower(request.getRatedPower());
         meter.setBuilding(building);
         meter.setRoomNumber(request.getRoomNumber());
-        meter.setActive(true);
+        if (request.getUsageDescription() != null) {
+            meter.setUsageDescription(request.getUsageDescription());
+        }
 
         Meter savedMeter = meterRepository.save(meter);
-        log.info("创建设备成功: {}", savedMeter.getDeviceName());
+        log.info("创建设备成功: {}", savedMeter.getName());
 
         return MeterResponse.fromEntity(savedMeter);
     }
@@ -79,19 +81,19 @@ public class MeterServiceImpl implements MeterService {
         // Pattern: Business Rule - 检查房间号冲突（排除自身）
         if (!(meter.getBuilding().getId().equals(request.getBuildingId()) && 
                 meter.getRoomNumber().equals(request.getRoomNumber())) &&
-                meterRepository.existsByBuildingIdAndRoomNumberAndActiveTrue(
+                meterRepository.existsByBuildingIdAndRoomNumberAndStatus(
                         request.getBuildingId(), request.getRoomNumber())) {
             throw new BusinessException("该建筑下房间号已存在有效设备");
         }
 
-        meter.setDeviceName(request.getDeviceName());
+        meter.setName(request.getName());
         meter.setSerialNumber(request.getSerialNumber());
-        meter.setPowerThreshold(request.getPowerThreshold());
+        meter.setRatedPower(request.getRatedPower());
         meter.setBuilding(building);
         meter.setRoomNumber(request.getRoomNumber());
 
         Meter updatedMeter = meterRepository.save(meter);
-        log.info("更新设备成功: {}", updatedMeter.getDeviceName());
+        log.info("更新设备成功: {}", updatedMeter.getName());
 
         return MeterResponse.fromEntity(updatedMeter);
     }
@@ -103,7 +105,7 @@ public class MeterServiceImpl implements MeterService {
                 .orElseThrow(() -> new BusinessException("设备不存在"));
 
         meterRepository.delete(meter);
-        log.info("删除设备成功: {}", meter.getDeviceName());
+        log.info("删除设备成功: {}", meter.getName());
     }
 
     @Override
@@ -112,9 +114,9 @@ public class MeterServiceImpl implements MeterService {
         Meter meter = meterRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("设备不存在"));
 
-        meter.setActive(false);
+        meter.setStatus(com.energy.management.enums.DeviceStatus.DECOMMISSIONED);
         meterRepository.save(meter);
-        log.info("停用设备成功: {}", meter.getDeviceName());
+        log.info("停用设备成功: {}", meter.getName());
     }
 
     @Override

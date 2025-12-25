@@ -21,7 +21,7 @@ public class AlertResponse {
         AlertResponse response = new AlertResponse();
         response.setId(alert.getId());
         response.setMeterId(alert.getMeter().getId());
-        response.setMeterName(alert.getMeter().getDeviceName());
+        response.setMeterName(alert.getMeter().getName());
         response.setSerialNumber(alert.getMeter().getSerialNumber());
         response.setAlertType(alert.getAlertType());
         response.setAlertValue(alert.getAlertValue());

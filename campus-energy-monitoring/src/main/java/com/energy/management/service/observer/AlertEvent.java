@@ -20,7 +20,7 @@ public class AlertEvent {
     private String generateAlertDetail(Alert.AlertType type, Double value) {
         switch (type) {
             case POWER_OVERLOAD:
-                return String.format("设备功率超限: %.2fW (阈值: %.2fW)", value, meter.getPowerThreshold());
+                return String.format("设备功率超限: %.2fW (阈值: %.2fW)", value, meter.getRatedPower());
             case VOLTAGE_ABNORMAL:
                 return String.format("电压异常: %.2fV (正常范围: 198V-242V)", value);
             case DEVICE_OFFLINE:

@@ -99,7 +99,7 @@ public class DataSimulatorService {
 
     private void checkAndTriggerAlert(Meter meter, EnergyData data) {
         // 检查功率超限
-        if (meter.getPowerThreshold() != null && data.getPower() > meter.getPowerThreshold()) {
+        if (meter.getRatedPower() != null && data.getPower() > meter.getRatedPower()) {
             // Pattern: Observer - 发布功率超限告警事件
             alertPublisher.publishPowerOverloadAlert(meter, data.getPower());
         }

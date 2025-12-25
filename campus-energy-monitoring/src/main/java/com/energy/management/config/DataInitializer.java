@@ -3,6 +3,8 @@ package com.energy.management.config;
 import com.energy.management.entity.Building;
 import com.energy.management.entity.Meter;
 import com.energy.management.entity.User;
+import com.energy.management.enums.DeviceStatus;
+import com.energy.management.enums.UserRole;
 import com.energy.management.repository.BuildingRepository;
 import com.energy.management.repository.MeterRepository;
 import com.energy.management.repository.UserRepository;
@@ -48,7 +50,7 @@ public class DataInitializer implements CommandLineRunner {
         admin.setUsername("admin");
         admin.setPassword(passwordEncoder.encode("123456"));
         admin.setEmail("admin@campus.edu");
-        admin.setRole(User.UserRole.ADMIN);
+        admin.setRole(UserRole.ADMIN);
         userRepository.save(admin);
         log.info("创建管理员账号: admin");
         
@@ -56,7 +58,7 @@ public class DataInitializer implements CommandLineRunner {
         user.setUsername("user");
         user.setPassword(passwordEncoder.encode("123456"));
         user.setEmail("user@campus.edu");
-        user.setRole(User.UserRole.USER);
+        user.setRole(UserRole.USER);
         userRepository.save(user);
         log.info("创建普通用户账号: user");
     }
@@ -112,15 +114,15 @@ public class DataInitializer implements CommandLineRunner {
     }
     
     private void createDevice(String name, String serialNumber, Building building, 
-                              String roomNumber, Double powerThreshold) {
-        Meter meter = new Meter();
-        meter.setDeviceName(name);
-        meter.setSerialNumber(serialNumber);
-        meter.setStatus(Meter.DeviceStatus.ONLINE);
-        meter.setPowerThreshold(powerThreshold);
-        meter.setBuilding(building);
-        meter.setRoomNumber(roomNumber);
-        meter.setActive(true);
+                              String roomNumber, Double ratedPower) {
+        Meter meter = Meter.builder()
+                .name(name)
+                .serialNumber(serialNumber)
+                .status(DeviceStatus.ONLINE)
+                .ratedPower(ratedPower)
+                .building(building)
+                .roomNumber(roomNumber)
+                .build();
         meterRepository.save(meter);
         log.debug("创建设备: {} (SN: {})", name, serialNumber);
     }

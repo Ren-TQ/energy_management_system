@@ -21,7 +21,7 @@ public class EnergyDataResponse {
         EnergyDataResponse response = new EnergyDataResponse();
         response.setId(data.getId());
         response.setMeterId(data.getMeter().getId());
-        response.setMeterName(data.getMeter().getDeviceName());
+        response.setMeterName(data.getMeter().getName());
         response.setSerialNumber(data.getMeter().getSerialNumber());
         response.setVoltage(data.getVoltage());
         response.setCurrent(data.getCurrent());

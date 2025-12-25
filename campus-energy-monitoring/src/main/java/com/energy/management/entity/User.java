@@ -1,88 +1,69 @@
 package com.energy.management.entity;
 
-import lombok.Data;
+import com.energy.management.enums.UserRole;
 import jakarta.persistence.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
 
 @Entity
-@Table(name = "users")
+@Table(name = "t_user", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"username"})
+})
 @Data
-public class User implements UserDetails {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(unique = true, nullable = false)
+    
+    @Column(name = "username", nullable = false, unique = true, length = 50)
     private String username;
-
-    @Column(nullable = false)
+    
+    @Column(name = "password", nullable = false, length = 100)
     private String password;
-
-    @Column(nullable = false)
+    
+    @Column(name = "real_name", length = 50)
+    private String realName;
+    
+    @Column(name = "email", length = 100)
     private String email;
-
+    
+    @Column(name = "phone", length = 20)
+    private String phone;
+    
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role;
-
-    @Column(name = "created_at")
+    @Column(name = "role", nullable = false, length = 20)
+    @Builder.Default
+    private UserRole role = UserRole.USER;
+    
+    @Column(name = "enabled")
+    @Builder.Default
+    private Boolean enabled = true;
+    
+    @Column(name = "last_login_time")
+    private LocalDateTime lastLoginTime;
+    
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "last_login")
-    private LocalDateTime lastLogin;
-
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
-
-    public enum UserRole {
-        ADMIN, USER
-    }
-
-    // =============== UserDetails 接口实现 ===============
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 将角色转换为 Spring Security 需要的格式
-        return Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + role.name())
-        );
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password;
-    }
-
-    @Override
-    public String getUsername() {
-        return this.username;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true; // 账户未过期
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true; // 账户未锁定
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true; // 凭证未过期
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true; // 账户启用
+    
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

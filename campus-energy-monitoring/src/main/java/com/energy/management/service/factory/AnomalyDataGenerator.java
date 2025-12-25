@@ -22,19 +22,19 @@ public class AnomalyDataGenerator implements DataGenerator {
         switch (anomalyType) {
             case 0: // 功率过载
                 data.setVoltage(220.0);
-                data.setPower(meter.getPowerThreshold() * 1.2); // 超过阈值20%
+                data.setPower(meter.getRatedPower() * 1.2); // 超过阈值20%
                 data.setAlertDetail("功率过载异常");
                 break;
 
             case 1: // 电压过高
                 data.setVoltage(260.0); // 明显高于正常范围
-                data.setPower(meter.getPowerThreshold() * 0.6);
+                data.setPower(meter.getRatedPower() * 0.6);
                 data.setAlertDetail("电压过高异常");
                 break;
 
             case 2: // 电压过低
                 data.setVoltage(180.0); // 明显低于正常范围
-                data.setPower(meter.getPowerThreshold() * 0.4);
+                data.setPower(meter.getRatedPower() * 0.4);
                 data.setAlertDetail("电压过低异常");
                 break;
         }
