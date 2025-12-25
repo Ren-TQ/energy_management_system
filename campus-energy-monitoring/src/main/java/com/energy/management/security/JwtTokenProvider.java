@@ -92,4 +92,8 @@ public class JwtTokenProvider {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+    
+    public long getExpiration() {
+        return jwtExpiration;
+    }
 }

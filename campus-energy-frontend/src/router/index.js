@@ -89,7 +89,7 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !token) {
     next('/login')
   } else if ((to.path === '/login' || to.path === '/register') && token) {
-    next('/')
+    next('/app/dashboard')
   } else {
     // 权限控制
     if (to.meta.requiresAdmin && userRole !== 'ADMIN') {
