@@ -1,0 +1,96 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: energy-management
+  
+  # 数据库配置
+  datasource:
+    url: jdbc:mysql://localhost:3307/energy_20231120043?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+    # 初始化脚本配置
+    initialization-mode: always
+    continue-on-error: true
+    schema: classpath:sql/init.sql
+  
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  
+  # 定时任务
+  task:
+    scheduling:
+      pool:
+        size: 5
+  
+  # Jackson配置
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      write-dates-as-timestamps: false
+
+# 应用配置
+app:
+  jwt:
+    secret: bXktc2VjcmV0LWtleS1mb3ItZW5lcmd5LW1hbmFnZW1lbnQtMjAyNS1zcHJpbmctYm9vdA==
+    expiration: 86400000  # 24小时毫秒数
+  
+  # 模拟器配置
+  simulator:
+    interval: 5000        # 5秒
+    anomaly-rate: 0.03    # 3%异常率
+  
+  # 数据配置
+  data:
+    retention-days: 30    # 保留30天
+
+# 日志配置
+logging:
+  level:
+    com.energy.management: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  file:
+    name: logs/energy-management.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Swagger配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+---
+# Docker 环境配置 (可选)
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:mysql://mysql:3306/energy_20231120043?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
