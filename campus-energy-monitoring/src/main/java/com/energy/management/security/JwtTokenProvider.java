@@ -1,96 +1,79 @@
 package com.energy.management.security;
 
-import com.energy.management.entity.User;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
-@Component
 @Slf4j
+@Component
 public class JwtTokenProvider {
-
-    @Value("${app.jwt.secret}")
+    
+    @Value("${jwt.secret}")
     private String jwtSecret;
-
-    @Value("${app.jwt.expiration}")
-    private int jwtExpiration;
-
+    
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
+    
+    private SecretKey secretKey;
+    
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
+    
     public String generateToken(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return generateToken(userDetails.getUsername());
+    }
+    
+    public String generateToken(String username) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
-
-        List<String> authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
+        
         return Jwts.builder()
-                .setSubject(user.getUsername())
-                .claim("auth", authorities)
-                .setIssuedAt(new Date())
-                .setExpiration(expiryDate)
-                .signWith(getSigningKey())
+                .subject(username)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(secretKey)
                 .compact();
     }
-
+    
     public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+        Claims claims = Jwts.parser()
+                .verifyWith(secretKey)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
-
+                .parseSignedClaims(token)
+                .getPayload();
+        
         return claims.getSubject();
     }
-
-    public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        String username = claims.getSubject();
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("auth").toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
-
-        return new UsernamePasswordAuthenticationToken(username, null, authorities);
-    }
-
-    public boolean validateToken(String authToken) {
+    
+    public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(authToken);
+            Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token);
             return true;
-        } catch (SecurityException ex) {
-            log.error("Invalid JWT signature");
-        } catch (MalformedJwtException ex) {
-            log.error("Invalid JWT token");
-        } catch (ExpiredJwtException ex) {
-            log.error("Expired JWT token");
-        } catch (UnsupportedJwtException ex) {
-            log.error("Unsupported JWT token");
-        } catch (IllegalArgumentException ex) {
-            log.error("JWT claims string is empty.");
+        } catch (MalformedJwtException e) {
+            log.error("无效的JWT Token: {}", e.getMessage());
+        } catch (ExpiredJwtException e) {
+            log.error("JWT Token已过期: {}", e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.error("不支持的JWT Token: {}", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.error("JWT Token为空: {}", e.getMessage());
         }
         return false;
-    }
-
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
     
     public long getExpiration() {

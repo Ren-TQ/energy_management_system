@@ -49,11 +49,13 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
+# JWT 配置
+jwt:
+  secret: CampusEnergyMonitoringSecretKeyForJWTTokenGeneration2025SecureKey
+  expiration: 86400000  # 24小时 (毫秒)
+
 # 应用配置
 app:
-  jwt:
-    secret: bXktc2VjcmV0LWtleS1mb3ItZW5lcmd5LW1hbmFnZW1lbnQtMjAyNS1zcHJpbmctYm9vdA==
-    expiration: 86400000  # 24小时毫秒数
   
   # 模拟器配置
   simulator:
