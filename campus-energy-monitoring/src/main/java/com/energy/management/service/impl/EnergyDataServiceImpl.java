@@ -1,164 +1,98 @@
 package com.energy.management.service.impl;
 
-import com.energy.management.dto.chart.ChartData;
-import com.energy.management.dto.chart.PowerTrendData;
-import com.energy.management.dto.response.EnergyDataResponse;
+import com.energy.management.dto.EnergyDataDTO;
 import com.energy.management.entity.EnergyData;
 import com.energy.management.entity.Meter;
-import com.energy.management.exception.BusinessException;
 import com.energy.management.repository.EnergyDataRepository;
-import com.energy.management.repository.MeterRepository;
 import com.energy.management.service.EnergyDataService;
-import com.energy.management.service.strategy.CostCalculatorContext;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class EnergyDataServiceImpl implements EnergyDataService {
-
-    @Autowired
-    private EnergyDataRepository energyDataRepository;
-
-    @Autowired
-    private MeterRepository meterRepository;
-
-    @Autowired
-    private CostCalculatorContext costCalculatorContext;
-
+    
+    private final EnergyDataRepository energyDataRepository;
+    
     @Override
     @Transactional
-    public EnergyData saveEnergyData(EnergyData data) {
-        // 验证数据逻辑一致性
-        validateEnergyData(data);
-
-        EnergyData savedData = energyDataRepository.save(data);
-        log.debug("保存能耗数据: 设备{} 功率{}W",
-                data.getDevice().getSerialNumber(), data.getPower());
-
-        return savedData;
+    public EnergyData saveEnergyData(EnergyData energyData) {
+        return energyDataRepository.save(energyData);
     }
-
-    private void validateEnergyData(EnergyData data) {
-        // 验证物理公式 P = U×I
-        double calculatedPower = data.getVoltage() * data.getCurrent();
-        double tolerance = 0.01; // 1%容差
-
-        if (Math.abs(data.getPower() - calculatedPower) > tolerance) {
-            throw new BusinessException(String.format(
-                    "数据逻辑错误: 功率(%.2fW) ≠ 电压(%.2fV) × 电流(%.2fA) = %.2fW",
-                    data.getPower(), data.getVoltage(), data.getCurrent(), calculatedPower
-            ));
-        }
-
-        // 验证电压范围
-        if (data.getVoltage() < 0 || data.getVoltage() > 1000) {
-            throw new BusinessException(String.format(
-                    "电压值异常: %.2fV (应在0-1000V范围内)", data.getVoltage()
-            ));
-        }
-    }
-
+    
     @Override
-    public EnergyDataResponse getLatestDataByMeterId(Long meterId) {
-        Optional<EnergyData> dataOpt = energyDataRepository.findTopByDeviceIdOrderByCollectTimeDesc(meterId);
-
-        if (dataOpt.isEmpty()) {
-            return null;
-        }
-
-        return EnergyDataResponse.fromEntity(dataOpt.get());
+    public Page<EnergyDataDTO> getEnergyDataByDeviceId(Long deviceId, Pageable pageable) {
+        return energyDataRepository.findByDeviceId(deviceId, pageable)
+                .map(this::convertToDTO);
     }
-
+    
     @Override
-    public List<EnergyDataResponse> getRecentDataByMeterId(Long meterId, int limit) {
-        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "collectTime"));
-        Page<EnergyData> dataPage = energyDataRepository.findByDeviceId(meterId, pageable);
-
-        return dataPage.getContent().stream()
-                .map(EnergyDataResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Optional<EnergyDataDTO> getLatestEnergyData(Long deviceId) {
+        return energyDataRepository.findTopByDeviceIdOrderByCollectTimeDesc(deviceId)
+                .map(this::convertToDTO);
     }
-
+    
     @Override
-    public List<EnergyDataResponse> getHistoryData(Long meterId, LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate.atStartOfDay();
-        LocalDateTime end = endDate.plusDays(1).atStartOfDay();
-
-        List<EnergyData> dataList = energyDataRepository.findByDeviceIdAndTimeRange(meterId, start, end);
-
-        return dataList.stream()
-                .map(EnergyDataResponse::fromEntity)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public PowerTrendData getPowerTrendData(Long meterId, int limit) {
-        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "collectTime"));
-        Page<EnergyData> dataPage = energyDataRepository.findByDeviceId(meterId, pageable);
-        List<EnergyData> dataList = dataPage.getContent();
-
-        Collections.reverse(dataList); // 按时间顺序
-
-        List<String> timestamps = dataList.stream()
-                .map(data -> data.getCollectTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
-                .collect(Collectors.toList());
-
-        List<Double> powerValues = dataList.stream()
-                .map(EnergyData::getPower)
-                .collect(Collectors.toList());
-
-        return new PowerTrendData(timestamps, powerValues);
-    }
-
-    @Override
-    public ChartData getTodayEnergyDistribution() {
-        // 获取所有建筑
-        List<Object[]> results = energyDataRepository.findAll()
+    public List<EnergyDataDTO> getEnergyDataByTimeRange(Long deviceId, 
+                                                         LocalDateTime startTime, 
+                                                         LocalDateTime endTime) {
+        return energyDataRepository.findByDeviceIdAndTimeRange(deviceId, startTime, endTime)
                 .stream()
-                .filter(data -> data.getCollectTime().toLocalDate().equals(LocalDate.now()))
-                .collect(Collectors.groupingBy(
-                        data -> data.getDevice().getBuilding().getName(),
-                        Collectors.summingDouble(EnergyData::getTotalEnergy)
-                ))
-                .entrySet().stream()
-                .map(entry -> new Object[]{entry.getKey(), entry.getValue()})
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
-
-        List<String> labels = new ArrayList<>();
-        List<Double> values = new ArrayList<>();
-
-        for (Object[] result : results) {
-            labels.add((String) result[0]);
-            values.add((Double) result[1]);
-        }
-
-        return new ChartData(labels, values);
     }
-
+    
     @Override
-    public Double calculateTodayCost() {
-        // 计算今日总能耗
-        Double totalEnergy = energyDataRepository.findAll()
+    public List<EnergyDataDTO> getLatestEnergyDataForAllDevices() {
+        return energyDataRepository.findLatestEnergyDataForAllDevices()
                 .stream()
-                .filter(data -> data.getCollectTime().toLocalDate().equals(LocalDate.now()))
-                .mapToDouble(EnergyData::getTotalEnergy)
-                .sum();
-
-        // 使用策略模式计算费用
-        String period = costCalculatorContext.isPeakHour() ? "peak" : "offPeak";
-        return costCalculatorContext.calculate(period, totalEnergy);
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public Double calculateEnergyConsumption(Long deviceId, 
+                                             LocalDateTime startTime, 
+                                             LocalDateTime endTime) {
+        return energyDataRepository.calculateEnergyConsumption(deviceId, startTime, endTime);
+    }
+    
+    @Override
+    public Optional<Double> getLatestTotalEnergy(Long deviceId) {
+        return energyDataRepository.findLatestTotalEnergyByDeviceId(deviceId);
+    }
+    
+    @Override
+    public List<EnergyDataDTO> getTodayEnergyData(Long deviceId) {
+        LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+        LocalDateTime now = LocalDateTime.now();
+        return getEnergyDataByTimeRange(deviceId, startOfDay, now);
+    }
+    
+    private EnergyDataDTO convertToDTO(EnergyData energyData) {
+        Meter device = energyData.getDevice();
+        
+        return EnergyDataDTO.builder()
+                .id(energyData.getId())
+                .deviceId(device.getId())
+                .deviceName(device.getName())
+                .deviceSerialNumber(device.getSerialNumber())
+                .voltage(energyData.getVoltage())
+                .current(energyData.getCurrent())
+                .power(energyData.getPower())
+                .totalEnergy(energyData.getTotalEnergy())
+                .isAbnormal(energyData.getIsAbnormal())
+                .collectTime(energyData.getCollectTime())
+                .build();
     }
 }

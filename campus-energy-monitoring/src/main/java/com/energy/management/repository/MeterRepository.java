@@ -30,4 +30,8 @@ public interface MeterRepository extends JpaRepository<Meter, Long> {
     );
     
     boolean existsByBuildingIdAndRoomNumberAndStatus(Long buildingId, String roomNumber, DeviceStatus status);
+    
+    long countByStatus(DeviceStatus status);
+    
+    long countByBuildingId(Long buildingId);
 }
