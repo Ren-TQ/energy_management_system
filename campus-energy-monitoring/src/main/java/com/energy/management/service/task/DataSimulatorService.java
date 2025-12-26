@@ -2,128 +2,128 @@ package com.energy.management.service.task;
 
 import com.energy.management.entity.EnergyData;
 import com.energy.management.entity.Meter;
-import com.energy.management.service.factory.DataGeneratorFactory;
-import com.energy.management.service.observer.AlertPublisher;
+import com.energy.management.enums.DeviceStatus;
+import com.energy.management.pattern.factory.AbnormalEnergyDataFactory;
+import com.energy.management.pattern.factory.NormalEnergyDataFactory;
+import com.energy.management.pattern.observer.AlertObserver;
+import com.energy.management.pattern.observer.AlertSubject;
 import com.energy.management.repository.EnergyDataRepository;
 import com.energy.management.repository.MeterRepository;
-import com.energy.management.service.EnergyDataService;
+import com.energy.management.service.AlertService;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Service
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class DataSimulatorService {
-
-    @Autowired
-    private MeterRepository meterRepository;
-
-    @Autowired
-    private EnergyDataRepository energyDataRepository;
-
-    @Autowired
-    private DataGeneratorFactory generatorFactory;
-
-    @Autowired
-    private AlertPublisher alertPublisher;
-
-    @Autowired
-    private EnergyDataService energyDataService;
-
-    private final AtomicInteger dataCount = new AtomicInteger(0);
-    private final AtomicInteger totalCount = new AtomicInteger(0);
-
-    /**
-     * Pattern: Scheduled Task - 定时生成模拟数据
-     * 每5秒执行一次，生成所有活跃设备的能耗数据
-     */
-    @Scheduled(fixedRate = 5000)  // 5秒
+    
+    private final MeterRepository meterRepository;
+    private final EnergyDataRepository energyDataRepository;
+    private final AlertService alertService;
+    private final AlertSubject alertSubject;
+    private final List<AlertObserver> alertObservers;
+    private final NormalEnergyDataFactory normalDataFactory;
+    private final AbnormalEnergyDataFactory abnormalDataFactory;
+    
+    @Value("${simulator.enabled:true}")
+    private boolean simulatorEnabled;
+    
+    @Value("${simulator.anomaly-frequency:30}")
+    private int anomalyFrequency;
+    
+    private final AtomicInteger dataCounter = new AtomicInteger(0);
+    
+    @PostConstruct
+    public void init() {
+        log.info("============================================");
+        log.info("能耗数据模拟器初始化");
+        log.info("模拟器状态: {}", simulatorEnabled ? "已启用" : "已禁用");
+        log.info("异常数据频率: 每 {} 条正常数据生成1条异常数据", anomalyFrequency);
+        log.info("============================================");
+        
+        alertObservers.forEach(alertSubject::registerObserver);
+        log.info("已注册 {} 个告警观察者", alertSubject.getObserverCount());
+    }
+    
+    @Scheduled(fixedRateString = "${simulator.interval:5000}")
     @Transactional
-    public void generateSimulatedData() {
-        List<Meter> activeMeters = meterRepository.findByActiveTrue();
-
-        if (activeMeters == null || activeMeters.isEmpty()) {
-            log.warn("没有活跃的设备，跳过数据生成");
+    public void generateEnergyData() {
+        if (!simulatorEnabled) {
             return;
         }
-
-        // 精确控制只生成10台设备数据
-        int deviceLimit = Math.min(activeMeters.size(), 10);
-        log.info("开始生成模拟数据，设备数量: {}", deviceLimit);
-
-        for (int i = 0; i < deviceLimit; i++) {
+        
+        List<Meter> onlineDevices = meterRepository.findByStatus(DeviceStatus.ONLINE);
+        
+        if (onlineDevices.isEmpty()) {
+            log.debug("没有在线设备，跳过数据生成");
+            return;
+        }
+        
+        log.debug("开始为 {} 个在线设备生成能耗数据", onlineDevices.size());
+        
+        for (Meter device : onlineDevices) {
             try {
-                generateMeterData(activeMeters.get(i));
+                generateDataForDevice(device);
             } catch (Exception e) {
-                log.error("为设备 {} 生成数据失败: {}", activeMeters.get(i).getSerialNumber(), e.getMessage());
+                log.error("设备[{}]数据生成失败: {}", device.getSerialNumber(), e.getMessage(), e);
             }
         }
-
-        int currentCount = dataCount.incrementAndGet();
-        log.info("第 {} 轮数据生成完成", currentCount);
+        
+        log.debug("本轮数据生成完成，总计数: {}", dataCounter.get());
     }
-
-    private void generateMeterData(Meter meter) {
-        // 每生成30条正常数据后生成一条异常数据
-        int currentTotal = totalCount.incrementAndGet();
-        boolean shouldGenerateAnomaly = currentTotal > 0 && currentTotal % 30 == 0;
-
-        String generatorType = shouldGenerateAnomaly ? "anomaly" : "normal";
-        // Pattern: Factory - 使用工厂模式根据类型生成不同的数据
-        EnergyData data = generatorFactory.getGenerator(generatorType).generateData(meter);
-
-        // 保存数据
-        energyDataRepository.save(data);
-
-        // Pattern: Observer - 使用观察者模式检查并触发告警
-        checkAndTriggerAlert(meter, data);
-
-        log.debug("生成数据 - 设备: {}, 电压: {}V, 电流: {}A, 功率: {}W, 类型: {}",
-                meter.getSerialNumber(),
-                data.getVoltage(),
-                data.getCurrent(),
-                data.getPower(),
-                generatorType);
-    }
-
-    private int getAnomalyInterval() {
-        // 随机间隔20-50次
-        return 20 + (int)(Math.random() * 31);
-    }
-
-    private void checkAndTriggerAlert(Meter meter, EnergyData data) {
-        // 检查功率超限
-        if (meter.getRatedPower() != null && data.getPower() > meter.getRatedPower()) {
-            // Pattern: Observer - 发布功率超限告警事件
-            alertPublisher.publishPowerOverloadAlert(meter, data.getPower());
+    
+    private void generateDataForDevice(Meter device) {
+        Double lastTotalEnergy = energyDataRepository
+                .findLatestTotalEnergyByDeviceId(device.getId())
+                .orElse(0.0);
+        
+        int count = dataCounter.incrementAndGet();
+        
+        EnergyData energyData;
+        if (count % anomalyFrequency == 0) {
+            log.info("故障注入：为设备[{}]生成异常数据", device.getSerialNumber());
+            energyData = abnormalDataFactory.createEnergyData(device, lastTotalEnergy);
+        } else {
+            energyData = normalDataFactory.createEnergyData(device, lastTotalEnergy);
         }
-
-        // 检查电压异常（±10%）
-        if (data.getVoltage() < 198 || data.getVoltage() > 242) {
-            // Pattern: Observer - 发布电压异常告警事件
-            alertPublisher.publishVoltageAbnormalAlert(meter, data.getVoltage());
-        }
-
-        // 检查设备状态（这里简化处理，实际需要更复杂的状态监控）
-        // 可以添加设备离线的检测逻辑
+        
+        energyDataRepository.save(energyData);
+        
+        log.debug("设备[{}] - 电压: {}V, 电流: {}A, 功率: {}W, 累计: {}kWh, 异常: {}",
+                device.getSerialNumber(),
+                energyData.getVoltage(),
+                energyData.getCurrent(),
+                energyData.getPower(),
+                energyData.getTotalEnergy(),
+                energyData.getIsAbnormal());
+        
+        alertService.checkAndTriggerAlerts(device, energyData);
     }
-
-    /**
-     * 每小时执行一次，清理过期数据（保留30天）
-     */
-    @Scheduled(cron = "0 0 * * * ?")  // 每小时整点
-    @Transactional
-    public void cleanupOldData() {
-        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(30);
-
-        // 这里需要实现数据清理逻辑
-        // 在实际项目中，可以使用@Modifying查询或分区表
-        log.info("数据清理任务执行，清理30天前的数据");
+    
+    public void triggerManualGeneration() {
+        log.info("手动触发能耗数据生成");
+        generateEnergyData();
+    }
+    
+    public void setSimulatorEnabled(boolean enabled) {
+        this.simulatorEnabled = enabled;
+        log.info("模拟器状态已更改为: {}", enabled ? "启用" : "禁用");
+    }
+    
+    public boolean isSimulatorEnabled() {
+        return simulatorEnabled;
+    }
+    
+    public int getGeneratedDataCount() {
+        return dataCounter.get();
     }
 }

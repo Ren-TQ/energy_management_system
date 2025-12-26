@@ -8,48 +8,48 @@
         <h1>智慧校园能耗监测平台</h1>
         <p>Campus Energy Monitoring System</p>
       </div>
-      
-      <el-form
+
+        <el-form
         ref="formRef"
-        :model="loginForm"
+          :model="loginForm"
         :rules="rules"
         class="login-form"
         @submit.prevent="handleLogin"
-      >
-        <el-form-item prop="username">
-          <el-input
-            v-model="loginForm.username"
-            placeholder="请输入用户名"
+        >
+          <el-form-item prop="username">
+            <el-input
+              v-model="loginForm.username"
+              placeholder="请输入用户名"
             prefix-icon="User"
-            size="large"
-          />
-        </el-form-item>
-        
-        <el-form-item prop="password">
-          <el-input
-            v-model="loginForm.password"
-            type="password"
-            placeholder="请输入密码"
+              size="large"
+            />
+          </el-form-item>
+
+          <el-form-item prop="password">
+            <el-input
+              v-model="loginForm.password"
+              type="password"
+              placeholder="请输入密码"
             prefix-icon="Lock"
-            size="large"
+              size="large"
             show-password
-            @keyup.enter="handleLogin"
-          />
-        </el-form-item>
-        
-        <el-form-item>
-          <el-button
-            type="primary"
-            size="large"
+              @keyup.enter="handleLogin"
+            />
+          </el-form-item>
+
+          <el-form-item>
+            <el-button
+              type="primary"
+              size="large"
             class="login-btn"
-            :loading="loading"
-            @click="handleLogin"
-          >
+              :loading="loading"
+              @click="handleLogin"
+            >
             {{ loading ? '登录中...' : '登 录' }}
-          </el-button>
-        </el-form-item>
-      </el-form>
-      
+            </el-button>
+          </el-form-item>
+        </el-form>
+
       <div class="login-footer">
         <p>默认账号：admin / 123456（管理员）</p>
         <p>普通用户：user / 123456</p>
@@ -91,33 +91,33 @@ async function handleLogin() {
   
   await formRef.value.validate(async (valid) => {
     if (!valid) return
-    
+
     loading.value = true
-    
+
     try {
-      const response = await api.auth.login({
-        username: loginForm.username,
-        password: loginForm.password
-      })
+    const response = await api.auth.login({
+      username: loginForm.username,
+      password: loginForm.password
+    })
 
       // 保存用户信息到 Vuex store
-      store.dispatch('login', {
-        token: response.token,
-        userInfo: {
-          username: response.username,
-          role: response.role,
-          userId: response.userId
-        }
-      })
+    store.dispatch('login', {
+      token: response.token,
+      userInfo: {
+        username: response.username,
+        role: response.role,
+        userId: response.userId
+      }
+    })
 
-      ElMessage.success('登录成功')
+    ElMessage.success('登录成功')
       router.push('/app/dashboard')
-    } catch (error) {
-      console.error('登录失败:', error)
-      ElMessage.error(error.message || '登录失败，请检查用户名和密码')
-    } finally {
-      loading.value = false
-    }
+  } catch (error) {
+    console.error('登录失败:', error)
+    ElMessage.error(error.message || '登录失败，请检查用户名和密码')
+  } finally {
+    loading.value = false
+  }
   })
 }
 </script>
@@ -172,8 +172,8 @@ async function handleLogin() {
 .login-form {
   .el-form-item {
     margin-bottom: 24px;
-  }
-  
+}
+
   .login-btn {
     width: 100%;
     height: 44px;
@@ -187,7 +187,7 @@ async function handleLogin() {
   margin-top: 20px;
   
   p {
-    font-size: 12px;
+  font-size: 12px;
     color: #909399;
     margin: 4px 0;
   }

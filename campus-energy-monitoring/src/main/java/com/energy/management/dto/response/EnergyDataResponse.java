@@ -20,14 +20,14 @@ public class EnergyDataResponse {
     public static EnergyDataResponse fromEntity(EnergyData data) {
         EnergyDataResponse response = new EnergyDataResponse();
         response.setId(data.getId());
-        response.setMeterId(data.getMeter().getId());
-        response.setMeterName(data.getMeter().getName());
-        response.setSerialNumber(data.getMeter().getSerialNumber());
+        response.setMeterId(data.getDevice().getId());
+        response.setMeterName(data.getDevice().getName());
+        response.setSerialNumber(data.getDevice().getSerialNumber());
         response.setVoltage(data.getVoltage());
         response.setCurrent(data.getCurrent());
         response.setPower(data.getPower());
-        response.setEnergyConsumption(data.getEnergyConsumption());
-        response.setTimestamp(data.getTimestamp());
+        response.setEnergyConsumption(data.getTotalEnergy());
+        response.setTimestamp(data.getCollectTime());
         return response;
     }
 }
