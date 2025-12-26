@@ -26,16 +26,17 @@ public class BuildingServiceImpl implements BuildingService {
     @Override
     @Transactional
     public BuildingResponse createBuilding(BuildingRequest request) {
-        // 检查建筑名称是否已存在
         if (buildingRepository.existsByName(request.getName())) {
             throw new BusinessException("建筑名称已存在");
         }
 
-        Building building = new Building();
-        building.setName(request.getName());
-        building.setLocationCode(request.getLocationCode());
-        building.setFloors(request.getFloors());
-        building.setType(request.getType());
+        Building building = Building.builder()
+                .name(request.getName())
+                .locationCode(request.getLocationCode())
+                .floorCount(request.getFloorCount())
+                .category(request.getCategory())
+                .description(request.getDescription())
+                .build();
 
         Building savedBuilding = buildingRepository.save(building);
         log.info("创建建筑成功: {}", savedBuilding.getName());
@@ -49,7 +50,6 @@ public class BuildingServiceImpl implements BuildingService {
         Building building = buildingRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("建筑不存在"));
 
-        // 检查名称冲突（排除自身）
         if (!building.getName().equals(request.getName()) &&
                 buildingRepository.existsByName(request.getName())) {
             throw new BusinessException("建筑名称已存在");
@@ -57,8 +57,9 @@ public class BuildingServiceImpl implements BuildingService {
 
         building.setName(request.getName());
         building.setLocationCode(request.getLocationCode());
-        building.setFloors(request.getFloors());
-        building.setType(request.getType());
+        building.setFloorCount(request.getFloorCount());
+        building.setCategory(request.getCategory());
+        building.setDescription(request.getDescription());
 
         Building updatedBuilding = buildingRepository.save(building);
         log.info("更新建筑成功: {}", updatedBuilding.getName());
@@ -72,8 +73,7 @@ public class BuildingServiceImpl implements BuildingService {
         Building building = buildingRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("建筑不存在"));
 
-        // 检查是否有关联的设备
-        if (building.getMeters() != null && !building.getMeters().isEmpty()) {
+        if (building.getDevices() != null && !building.getDevices().isEmpty()) {
             throw new BusinessException("该建筑下存在设备，无法删除");
         }
 

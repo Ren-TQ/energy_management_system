@@ -1,6 +1,5 @@
 package com.energy.management.dto.request;
 
-import com.energy.management.entity.Building;
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 
@@ -11,7 +10,9 @@ public class BuildingRequest {
 
     private String locationCode;
 
-    private Integer floors;
+    private Integer floorCount;
 
-    private Building.BuildingType type;
+    private String category;
+
+    private String description;
 }

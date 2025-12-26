@@ -10,20 +10,24 @@ public class BuildingResponse {
     private Long id;
     private String name;
     private String locationCode;
-    private Integer floors;
-    private Building.BuildingType type;
+    private Integer floorCount;
+    private String category;
+    private String description;
     private LocalDateTime createdAt;
-    private Integer meterCount;
+    private LocalDateTime updatedAt;
+    private Integer deviceCount;
 
     public static BuildingResponse fromEntity(Building building) {
         BuildingResponse response = new BuildingResponse();
         response.setId(building.getId());
         response.setName(building.getName());
         response.setLocationCode(building.getLocationCode());
-        response.setFloors(building.getFloors());
-        response.setType(building.getType());
+        response.setFloorCount(building.getFloorCount());
+        response.setCategory(building.getCategory());
+        response.setDescription(building.getDescription());
         response.setCreatedAt(building.getCreatedAt());
-        response.setMeterCount(building.getMeters() != null ? building.getMeters().size() : 0);
+        response.setUpdatedAt(building.getUpdatedAt());
+        response.setDeviceCount(building.getDevices() != null ? building.getDevices().size() : 0);
         return response;
     }
 }

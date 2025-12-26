@@ -69,27 +69,33 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
         
-        Building lixingBuilding = new Building();
-        lixingBuilding.setName("力行楼");
-        lixingBuilding.setLocationCode("BLD_LX_001");
-        lixingBuilding.setFloors(6);
-        lixingBuilding.setType(Building.BuildingType.CLASSROOM);
+        Building lixingBuilding = Building.builder()
+                .name("力行楼")
+                .locationCode("BLD_LX_001")
+                .floorCount(6)
+                .category("教学楼")
+                .description("主要用于教学和实验")
+                .build();
         lixingBuilding = buildingRepository.save(lixingBuilding);
         log.info("创建建筑: {}", lixingBuilding.getName());
         
-        Building dormBuilding = new Building();
-        dormBuilding.setName("椒苑宿舍三号楼");
-        dormBuilding.setLocationCode("BLD_DORM_003");
-        dormBuilding.setFloors(7);
-        dormBuilding.setType(Building.BuildingType.DORMITORY);
+        Building dormBuilding = Building.builder()
+                .name("椒苑宿舍三号楼")
+                .locationCode("BLD_DORM_003")
+                .floorCount(7)
+                .category("宿舍楼")
+                .description("学生宿舍楼")
+                .build();
         dormBuilding = buildingRepository.save(dormBuilding);
         log.info("创建建筑: {}", dormBuilding.getName());
         
-        Building libraryBuilding = new Building();
-        libraryBuilding.setName("图书馆");
-        libraryBuilding.setLocationCode("BLD_LIB_001");
-        libraryBuilding.setFloors(5);
-        libraryBuilding.setType(Building.BuildingType.LIBRARY);
+        Building libraryBuilding = Building.builder()
+                .name("图书馆")
+                .locationCode("BLD_LIB_001")
+                .floorCount(5)
+                .category("图书馆")
+                .description("图书阅览和自习")
+                .build();
         libraryBuilding = buildingRepository.save(libraryBuilding);
         log.info("创建建筑: {}", libraryBuilding.getName());
         

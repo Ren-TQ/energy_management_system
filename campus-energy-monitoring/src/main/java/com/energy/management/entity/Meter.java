@@ -56,11 +56,11 @@ public class Meter {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
-    @OneToMany(mappedBy = "meter", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<EnergyData> energyDataList = new ArrayList<>();
     
-    @OneToMany(mappedBy = "meter", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Alert> alerts = new ArrayList<>();
     
