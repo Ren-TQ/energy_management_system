@@ -1,4 +1,4 @@
-package com.energy.management.service.task;
+package com.energy.management.simulator;
 
 import com.energy.management.entity.EnergyData;
 import com.energy.management.entity.Meter;
@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DataSimulatorService {
+public class EnergySimulatorService {
     
     private final MeterRepository meterRepository;
     private final EnergyDataRepository energyDataRepository;
@@ -127,3 +127,4 @@ public class DataSimulatorService {
         return dataCounter.get();
     }
 }
+
