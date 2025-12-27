@@ -1,5 +1,6 @@
 package com.energy.management.dto.auth;
 
+import com.energy.management.enums.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,7 +34,7 @@ public class LoginResponse {
     private String realName;
     
     @Schema(description = "用户角色")
-    private String role;
+    private UserRole role;
     
     @Schema(description = "角色描述")
     private String roleLabel;
