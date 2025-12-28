@@ -1,5 +1,8 @@
 package com.energy.management.exception;
 
+/**
+ * 业务异常类
+ */
 public class BusinessException extends RuntimeException {
     
     private Integer code;
