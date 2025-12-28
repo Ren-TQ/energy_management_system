@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -88,5 +89,18 @@ public class AlertController {
             @Parameter(description = "告警ID") @PathVariable Long id,
             @Parameter(description = "处理备注") @RequestParam(required = false) String resolveNote) {
         return Result.success("告警已处理", alertService.resolveAlert(id, resolveNote));
+    }
+    
+    @PostMapping("/batch-resolve")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "批量处理告警", description = "需要管理员权限")
+    public Result<Map<String, Object>> batchResolveAlerts(
+            @Parameter(description = "告警ID列表") @RequestBody List<Long> alertIds,
+            @Parameter(description = "处理备注") @RequestParam(required = false) String resolveNote) {
+        int resolvedCount = alertService.batchResolveAlerts(alertIds, resolveNote);
+        Map<String, Object> result = new HashMap<>();
+        result.put("resolvedCount", resolvedCount);
+        result.put("totalCount", alertIds.size());
+        return Result.success("批量处理完成", result);
     }
 }

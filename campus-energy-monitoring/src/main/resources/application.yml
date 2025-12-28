@@ -66,6 +66,19 @@ app:
   data:
     retention-days: 30    # 保留30天
 
+# 告警配置
+alert:
+  # 告警去重配置
+  deduplication:
+    window-minutes: 5     # 告警去重时间窗口（分钟），同一设备同一类型在此时间内只触发一次
+  # 功率过载告警配置
+  power:
+    overload-ratio: 1.2   # 过载比例（额定功率的120%）
+  # 电压异常告警配置
+  voltage:
+    min: 198             # 最低电压阈值（V）
+    max: 242             # 最高电压阈值（V）
+
 # 日志配置
 logging:
   level:
