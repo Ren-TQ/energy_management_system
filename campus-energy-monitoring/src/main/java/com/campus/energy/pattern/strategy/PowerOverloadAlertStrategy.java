@@ -55,13 +55,35 @@ public class PowerOverloadAlertStrategy implements AlertStrategy {
         if (energyData.getPower() > threshold) {
             // ============================================
             // 步骤3：构建告警对象
-            // 使用Builder模式创建告警对象
+            // 设计模式：Builder Pattern（建造者模式）
+            // ============================================
+            // 
+            // 建造者模式：使用链式调用创建Alert对象
+            // 
+            // 执行流程：
+            // 1. Alert.builder() - 创建Builder实例
+            // 2. 链式调用设置属性 - .device()、.alertType()等
+            // 3. .build() - 构建并返回Alert对象
+            // 
+            // 建造者模式优势体现：
+            // - 链式调用：代码可读性强，对象创建过程清晰
+            // - 参数可选：可以只设置需要的属性
+            // - 避免构造函数参数过多：Alert有很多属性，构造函数会很复杂
+            // 
+            // 与构造函数对比：
+            // 构造函数方式（不推荐）：
+            //   new Alert(null, device, AlertType.POWER_OVERLOAD, energyData.getPower(), threshold, description, false, null, null, LocalDateTime.now())
+            //   问题：参数过多，容易出错，可读性差
+            // 
+            // 建造者模式（推荐）：
+            //   Alert.builder().device(...).alertType(...).build()
+            //   优势：链式调用，可读性强，参数可选
             // ============================================
             Alert alert = Alert.builder()
-                    .device(device)  // 关联设备
+                    .device(device)  // 关联设备对象
                     .alertType(AlertType.POWER_OVERLOAD)  // 告警类型：功率过载
                     .alertValue(energyData.getPower())  // 当前实时功率值
-                    .thresholdValue(threshold)  // 告警阈值
+                    .thresholdValue(threshold)  // 告警阈值（计算出的过载阈值）
                     .description(String.format(
                             // 告警描述：包含详细信息，便于排查问题
                             "设备[%s]功率过载告警：当前功率 %.2fW，超过阈值 %.2fW（额定功率 %.2fW × %.0f%%）",
@@ -71,9 +93,9 @@ public class PowerOverloadAlertStrategy implements AlertStrategy {
                             device.getRatedPower(),     // 额定功率
                             overloadRatio * 100         // 过载比例（转换为百分比）
                     ))
-                    .triggerTime(LocalDateTime.now())  // 触发时间
+                    .triggerTime(LocalDateTime.now())  // 触发时间（当前时间）
                     .isResolved(false)  // 初始状态：未处理
-                    .build();
+                    .build();  // 构建Alert对象
             
             // ============================================
             // 步骤4：返回告警对象

@@ -149,22 +149,44 @@ public class DeviceService {
         
         // ============================================
         // 设计模式：Builder Pattern（建造者模式）
-        // 使用Lombok的@Builder注解自动生成的建造者模式
+        // ============================================
         // 
-        // 优势：
-        // 1. 链式调用，代码可读性强
-        // 2. 参数可选，避免构造函数参数过多
-        // 3. 对象创建过程清晰
+        // 建造者模式：使用链式调用创建Device对象
+        // 
+        // 执行流程：
+        // 1. Device.builder() - 创建Builder实例
+        // 2. 链式调用设置属性 - .name()、.serialNumber()等
+        // 3. .build() - 构建并返回Device对象
+        // 
+        // 建造者模式优势体现：
+        // - 链式调用：代码可读性强，对象创建过程清晰
+        // - 参数可选：可以只设置需要的属性，不需要的可以不设置
+        // - 避免构造函数参数过多：Device有很多属性，构造函数会很复杂
+        // - 易于维护：新增字段时，只需在builder()链中添加
+        // 
+        // 与构造函数对比：
+        // 构造函数方式（不推荐）：
+        //   new Device(null, dto.getName(), dto.getSerialNumber(), ...)
+        //   问题：参数过多，容易出错，可读性差
+        // 
+        // 建造者模式（推荐）：
+        //   Device.builder().name(...).serialNumber(...).build()
+        //   优势：链式调用，可读性强，参数可选
+        // 
+        // 代码说明：
+        // - 从DTO获取数据，转换为Entity对象
+        // - 设置默认值：如果status为null，默认为ONLINE
+        // - 关联对象：building对象已从数据库查询
         // ============================================
         Device device = Device.builder()
-                .name(dto.getName())
-                .serialNumber(dto.getSerialNumber())
-                .status(dto.getStatus() != null ? dto.getStatus() : DeviceStatus.ONLINE)
-                .ratedPower(dto.getRatedPower())
-                .building(building)
-                .roomNumber(dto.getRoomNumber())
-                .usageDescription(dto.getUsageDescription())
-                .build();
+                .name(dto.getName())  // 设置设备名称
+                .serialNumber(dto.getSerialNumber())  // 设置设备序列号
+                .status(dto.getStatus() != null ? dto.getStatus() : DeviceStatus.ONLINE)  // 设置状态，默认ONLINE
+                .ratedPower(dto.getRatedPower())  // 设置额定功率
+                .building(building)  // 设置关联建筑对象
+                .roomNumber(dto.getRoomNumber())  // 设置房间号
+                .usageDescription(dto.getUsageDescription())  // 设置用途描述
+                .build();  // 构建Device对象
         
         device = deviceRepository.save(device);
         log.info("创建设备成功: {} (SN: {})", device.getName(), device.getSerialNumber());
@@ -250,22 +272,50 @@ public class DeviceService {
     
     /**
      * 转换为DTO
+     * 
+     * ============================================
+     * 设计模式：Builder Pattern（建造者模式）
+     * ============================================
+     * 
+     * 建造者模式：使用链式调用创建DeviceDTO对象
+     * 
+     * 执行流程：
+     * 1. DeviceDTO.builder() - 创建Builder实例
+     * 2. 链式调用设置属性 - 从Entity对象获取数据并设置到DTO
+     * 3. .build() - 构建并返回DeviceDTO对象
+     * 
+     * 转换说明：
+     * - Entity转DTO：将Entity对象的属性转换为DTO对象的属性
+     * - 关联对象处理：将Building对象转换为buildingId和buildingName
+     * - 枚举转换：将DeviceStatus枚举转换为statusLabel字符串
+     * 
+     * 建造者模式优势体现：
+     * - 链式调用：代码可读性强，转换过程清晰
+     * - 参数可选：可以只设置需要的字段
+     * - 易于维护：新增字段时，只需在builder()链中添加
+     * 
+     * @param device Entity对象，包含完整的设备信息
+     * @return DeviceDTO对象，用于返回给Controller层
+     * ============================================
      */
     private DeviceDTO convertToDTO(Device device) {
+        // ============================================
+        // 建造者模式：使用链式调用创建DTO对象
+        // ============================================
         return DeviceDTO.builder()
-                .id(device.getId())
-                .name(device.getName())
-                .serialNumber(device.getSerialNumber())
-                .status(device.getStatus())
-                .statusLabel(device.getStatus().getLabel())
-                .ratedPower(device.getRatedPower())
-                .buildingId(device.getBuilding().getId())
-                .buildingName(device.getBuilding().getName())
-                .roomNumber(device.getRoomNumber())
-                .usageDescription(device.getUsageDescription())
-                .createdAt(device.getCreatedAt())
-                .updatedAt(device.getUpdatedAt())
-                .build();
+                .id(device.getId())  // 设置设备ID
+                .name(device.getName())  // 设置设备名称
+                .serialNumber(device.getSerialNumber())  // 设置设备序列号
+                .status(device.getStatus())  // 设置设备状态（枚举）
+                .statusLabel(device.getStatus().getLabel())  // 设置状态描述（字符串）
+                .ratedPower(device.getRatedPower())  // 设置额定功率
+                .buildingId(device.getBuilding().getId())  // 设置建筑ID（关联对象转ID）
+                .buildingName(device.getBuilding().getName())  // 设置建筑名称（关联对象转名称）
+                .roomNumber(device.getRoomNumber())  // 设置房间号
+                .usageDescription(device.getUsageDescription())  // 设置用途描述
+                .createdAt(device.getCreatedAt())  // 设置创建时间
+                .updatedAt(device.getUpdatedAt())  // 设置更新时间
+                .build();  // 构建DeviceDTO对象
     }
 }
 

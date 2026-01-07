@@ -117,10 +117,18 @@ public class VoltageAbnormalAlertStrategy implements AlertStrategy {
         if (voltage < minVoltage) {
             // ============================================
             // 构建电压过低告警对象
-            // 使用Builder模式创建告警对象
+            // 设计模式：Builder Pattern（建造者模式）
+            // ============================================
+            // 
+            // 建造者模式：使用链式调用创建Alert对象
+            // 
+            // 建造者模式优势：
+            // - 链式调用：代码可读性强，对象创建过程清晰
+            // - 参数可选：可以只设置需要的属性
+            // - 避免构造函数参数过多
             // ============================================
             Alert alert = Alert.builder()
-                    .device(device)  // 关联设备
+                    .device(device)  // 关联设备对象
                     .alertType(AlertType.VOLTAGE_LOW)  // 告警类型：电压过低
                     .alertValue(voltage)  // 当前电压值
                     .thresholdValue(minVoltage)  // 告警阈值（电压下限）
@@ -132,9 +140,9 @@ public class VoltageAbnormalAlertStrategy implements AlertStrategy {
                             minVoltage,            // 电压下限
                             STANDARD_VOLTAGE       // 标准电压
                     ))
-                    .triggerTime(LocalDateTime.now())  // 触发时间
+                    .triggerTime(LocalDateTime.now())  // 触发时间（当前时间）
                     .isResolved(false)  // 初始状态：未处理
-                    .build();
+                    .build();  // 构建Alert对象
             
             // ============================================
             // 返回电压过低告警
@@ -150,10 +158,18 @@ public class VoltageAbnormalAlertStrategy implements AlertStrategy {
         if (voltage > maxVoltage) {
             // ============================================
             // 构建电压过高告警对象
-            // 使用Builder模式创建告警对象
+            // 设计模式：Builder Pattern（建造者模式）
+            // ============================================
+            // 
+            // 建造者模式：使用链式调用创建Alert对象
+            // 
+            // 建造者模式优势：
+            // - 链式调用：代码可读性强，对象创建过程清晰
+            // - 参数可选：可以只设置需要的属性
+            // - 避免构造函数参数过多
             // ============================================
             Alert alert = Alert.builder()
-                    .device(device)  // 关联设备
+                    .device(device)  // 关联设备对象
                     .alertType(AlertType.VOLTAGE_HIGH)  // 告警类型：电压过高
                     .alertValue(voltage)  // 当前电压值
                     .thresholdValue(maxVoltage)  // 告警阈值（电压上限）
@@ -165,9 +181,9 @@ public class VoltageAbnormalAlertStrategy implements AlertStrategy {
                             maxVoltage,            // 电压上限
                             STANDARD_VOLTAGE       // 标准电压
                     ))
-                    .triggerTime(LocalDateTime.now())  // 触发时间
+                    .triggerTime(LocalDateTime.now())  // 触发时间（当前时间）
                     .isResolved(false)  // 初始状态：未处理
-                    .build();
+                    .build();  // 构建Alert对象
             
             // ============================================
             // 返回电压过高告警

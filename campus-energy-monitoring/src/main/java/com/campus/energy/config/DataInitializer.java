@@ -111,47 +111,63 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
         
+        // ============================================
+        // 设计模式：Builder Pattern（建造者模式）
+        // 使用链式调用创建Building对象
+        // ============================================
         // 创建建筑1: 楸苑宿舍三号楼
         Building dormBuilding = Building.builder()
-                .name("楸苑宿舍三号楼")
-                .locationCode("BLD_QIU_003")
-                .floorCount(7)
-                .category("宿舍楼")
-                .description("学生宿舍楼，共7层，每层20间宿舍")
-                .build();
+                .name("楸苑宿舍三号楼")  // 设置建筑名称
+                .locationCode("BLD_QIU_003")  // 设置位置编号
+                .floorCount(7)  // 设置楼层数
+                .category("宿舍楼")  // 设置建筑类别
+                .description("学生宿舍楼，共7层，每层20间宿舍")  // 设置建筑描述
+                .build();  // 构建Building对象
         dormBuilding = buildingRepository.save(dormBuilding);
         log.info("创建建筑: {}", dormBuilding.getName());
         
+        // ============================================
+        // 设计模式：Builder Pattern（建造者模式）
+        // 使用链式调用创建Building对象
+        // ============================================
         // 创建建筑2: 力行楼（教学楼）
         Building lixingBuilding = Building.builder()
-                .name("力行楼")
-                .locationCode("BLD_LIXING_001")
-                .floorCount(6)
-                .category("教学楼")
-                .description("教学楼，包含多个教室和阶梯教室")
-                .build();
+                .name("力行楼")  // 设置建筑名称
+                .locationCode("BLD_LIXING_001")  // 设置位置编号
+                .floorCount(6)  // 设置楼层数
+                .category("教学楼")  // 设置建筑类别
+                .description("教学楼，包含多个教室和阶梯教室")  // 设置建筑描述
+                .build();  // 构建Building对象
         lixingBuilding = buildingRepository.save(lixingBuilding);
         log.info("创建建筑: {}", lixingBuilding.getName());
         
+        // ============================================
+        // 设计模式：Builder Pattern（建造者模式）
+        // 使用链式调用创建Building对象
+        // ============================================
         // 创建建筑3: 软件学院楼
         Building softBuilding = Building.builder()
-                .name("软件学院楼")
-                .locationCode("BLD_SOFT_001")
-                .floorCount(6)
-                .category("教学楼")
-                .description("软件学院楼，包含实验室和办公室")
-                .build();
+                .name("软件学院楼")  // 设置建筑名称
+                .locationCode("BLD_SOFT_001")  // 设置位置编号
+                .floorCount(6)  // 设置楼层数
+                .category("教学楼")  // 设置建筑类别
+                .description("软件学院楼，包含实验室和办公室")  // 设置建筑描述
+                .build();  // 构建Building对象
         softBuilding = buildingRepository.save(softBuilding);
         log.info("创建建筑: {}", softBuilding.getName());
         
+        // ============================================
+        // 设计模式：Builder Pattern（建造者模式）
+        // 使用链式调用创建Building对象
+        // ============================================
         // 创建建筑4: 图书馆
         Building libraryBuilding = Building.builder()
-                .name("图书馆")
-                .locationCode("BLD_LIB_001")
-                .floorCount(5)
-                .category("图书馆")
-                .description("校图书馆，包含阅览室、自习室和多功能报告厅")
-                .build();
+                .name("图书馆")  // 设置建筑名称
+                .locationCode("BLD_LIB_001")  // 设置位置编号
+                .floorCount(5)  // 设置楼层数
+                .category("图书馆")  // 设置建筑类别
+                .description("校图书馆，包含阅览室、自习室和多功能报告厅")  // 设置建筑描述
+                .build();  // 构建Building对象
         libraryBuilding = buildingRepository.save(libraryBuilding);
         log.info("创建建筑: {}", libraryBuilding.getName());
         
@@ -186,18 +202,46 @@ public class DataInitializer implements CommandLineRunner {
     
     /**
      * 创建单个设备
+     * 
+     * ============================================
+     * 设计模式：Builder Pattern（建造者模式）
+     * ============================================
+     * 
+     * 建造者模式：使用链式调用创建Device对象
+     * 
+     * 执行流程：
+     * 1. Device.builder() - 创建Builder实例
+     * 2. 链式调用设置属性 - .name()、.serialNumber()等
+     * 3. .build() - 构建并返回Device对象
+     * 
+     * 建造者模式优势体现：
+     * - 链式调用：代码可读性强，对象创建过程清晰
+     * - 参数可选：可以只设置需要的属性
+     * - 避免构造函数参数过多：Device有很多属性，构造函数会很复杂
+     * 
+     * @param name 设备名称
+     * @param serialNumber 设备序列号
+     * @param building 所属建筑
+     * @param roomNumber 房间号
+     * @param ratedPower 额定功率
+     * @param description 用途描述
+     * ============================================
      */
     private void createDevice(String name, String serialNumber, Building building, 
                               String roomNumber, Double ratedPower, String description) {
+        // ============================================
+        // 建造者模式：使用链式调用创建Device对象
+        // ============================================
         Device device = Device.builder()
-                .name(name)
-                .serialNumber(serialNumber)
-                .status(DeviceStatus.ONLINE)
-                .ratedPower(ratedPower)
-                .building(building)
-                .roomNumber(roomNumber)
-                .usageDescription(description)
-                .build();
+                .name(name)  // 设置设备名称
+                .serialNumber(serialNumber)  // 设置设备序列号
+                .status(DeviceStatus.ONLINE)  // 设置设备状态：默认在线
+                .ratedPower(ratedPower)  // 设置额定功率
+                .building(building)  // 设置关联建筑对象
+                .roomNumber(roomNumber)  // 设置房间号
+                .usageDescription(description)  // 设置用途描述
+                .build();  // 构建Device对象
+        
         deviceRepository.save(device);
         log.debug("创建设备: {} (SN: {})", name, serialNumber);
     }
