@@ -79,7 +79,7 @@ energy_management/
 
 ### 1. 创建数据库
 
-数据库名称格式：`energy_学号`（例如：`energy_20231120043`）
+数据库名称格式：`energy_20231120043`
 
 ```sql
 CREATE DATABASE IF NOT EXISTS energy_20231120043 
@@ -211,7 +211,7 @@ spring:
 
 ### 3. 设计模式
 
-项目实现了7种设计模式，详见代码注释：
+项目实现了6种设计模式，详见代码注释：
 
 1. **Factory Pattern（工厂模式）**: 创建正常/异常能耗数据
 2. **Observer Pattern（观察者模式）**: 告警通知机制
@@ -219,7 +219,7 @@ spring:
 4. **Builder Pattern（建造者模式）**: 对象构建
 5. **Facade Pattern（外观模式）**: Service层封装
 6. **Adapter Pattern（适配器模式）**: API适配
-7. **Singleton Pattern（单例模式）**: 状态管理
+
 
 ---
 

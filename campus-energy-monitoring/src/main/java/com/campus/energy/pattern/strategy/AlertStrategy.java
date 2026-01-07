@@ -8,53 +8,61 @@ import java.util.Optional;
 
 /**
  * ============================================
- * 设计模式：Strategy Pattern（策略模式）
+ * 设计模式：Strategy Pattern（策略模式）- 策略接口
  * ============================================
- * 
- * 模式类型：行为型设计模式
- * 
- * 模式说明：
- * 定义一系列算法，把它们一个个封装起来，并且使它们可以相互替换。
- * 策略模式让算法的变化独立于使用算法的客户端。
- * 
+
  * 在此项目中的应用：
- * - Strategy接口：AlertStrategy（策略接口）
- * - ConcreteStrategy：PowerOverloadAlertStrategy（功率过载策略）
- * - ConcreteStrategy：VoltageAbnormalAlertStrategy（电压异常策略）
- * - Context：AlertService（使用策略的上下文）
+ * - Strategy接口：AlertStrategy（本接口）- 定义策略的统一接口
+ * - ConcreteStrategy：PowerOverloadAlertStrategy（功率过载策略）- 具体策略实现1
+ * - ConcreteStrategy：VoltageAbnormalAlertStrategy（电压异常策略）- 具体策略实现2
+ * - Context：AlertService（使用策略的上下文）- 持有策略列表并执行
  * 
  * 使用场景：
- * 不同类型的告警有不同的判断逻辑：
- * 1. 功率过载：检查功率是否超过额定功率的120%
- * 2. 电压异常：检查电压是否在正常范围内（198V-242V）
- * 3. 未来可扩展：电流异常、设备离线等策略
+ * 不同类型的告警有不同的判断逻辑，需要独立封装：
+ * 1. 功率过载策略：检查功率是否超过额定功率的120%
+ * 2. 电压异常策略：检查电压是否在正常范围内（198V-242V）
+ * 
+ * 执行流程：
+ * 1. AlertService持有所有策略实现的列表（Spring自动注入）
+ * 2. 当需要检查告警时，遍历所有策略
+ * 3. 每个策略独立判断是否需要告警
+ * 4. 如果策略返回告警对象，则触发告警通知（观察者模式）
  * 
  * 优势：
- * 1. 算法可以自由切换
- * 2. 避免使用多重条件判断（if-else）
- * 3. 符合开闭原则，易于扩展新策略
- * 4. 每个策略类职责单一，符合单一职责原则
- * 
- * 代码位置：
- * - 策略接口：com.campus.energy.pattern.strategy.AlertStrategy
- * - 使用位置：AlertService.checkAndTriggerAlerts()
+ * 1. 算法可以自由切换：运行时动态选择策略
+ * 2. 避免使用多重条件判断：不需要if-else或switch-case
+ * 3. 符合开闭原则：对扩展开放（新增策略），对修改关闭（不修改现有代码）
+ * 4. 每个策略类职责单一：一个策略只负责一种告警类型的判断
+ * 5. 易于测试：每个策略可以独立测试
+ * 6. 易于维护：策略逻辑集中，修改不影响其他策略
+
  * ============================================
  */
 public interface AlertStrategy {
     
     /**
      * 判断是否需要触发告警
+     * 方法职责：
+     * 1. 根据设备和能耗数据，判断是否符合告警条件
+     * 2. 如果符合条件，构建并返回告警对象
+     * 3. 如果不符合条件，返回Optional.empty()
      * 
-     * @param device 设备信息
-     * @param energyData 能耗数据
-     * @return 如果需要告警，返回告警对象；否则返回空
+
+     * @param device 设备信息，包含设备ID、名称、额定功率等
+     * @param energyData 能耗数据，包含电压、电流、功率等实时数据
+     * @return Optional<Alert> 
+     *         - 如果检测到异常，返回包含告警对象的Optional
+     *         - 如果未检测到异常，返回Optional.empty()
+     *
      */
     Optional<Alert> checkAlert(Device device, EnergyData energyData);
     
     /**
      * 获取策略名称
      * 
-     * @return 策略名称
+     * 用于日志记录和调试，标识当前使用的策略
+     * 
+     * @return 策略的中文名称，如"功率过载告警策略"、"电压异常告警策略"
      */
     String getStrategyName();
 }
