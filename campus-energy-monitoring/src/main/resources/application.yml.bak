@@ -1,0 +1,69 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: campus-energy-monitoring
+  
+  # MySQL 数据库配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/campus_energy?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf-8&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 1234
+  
+  # JPA 配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  
+  # 禁用SQL脚本初始化（手动导入表结构）
+  sql:
+    init:
+      mode: never
+
+# JWT 配置
+jwt:
+  secret: CampusEnergyMonitoringSecretKeyForJWTTokenGeneration2025SecureKey
+  expiration: 86400000  # 24小时 (毫秒)
+
+# 数据模拟器配置
+simulator:
+  enabled: true
+  interval: 5000  # 生成数据间隔 (毫秒)
+  anomaly-frequency: 30  # 每30条正常数据生成1条异常数据
+
+# 告警阈值配置
+alert:
+  voltage:
+    min: 198  # 220V * 0.9
+    max: 242  # 220V * 1.1
+  power:
+    overload-ratio: 1.2  # 超过额定功率的120%触发告警
+
+# Knife4j/Swagger 配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.campus.energy.controller
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.campus.energy: DEBUG
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
