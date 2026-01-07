@@ -11,9 +11,18 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
- * Pattern: Strategy - 功率过载告警策略
+ * ============================================
+ * 设计模式：Strategy Pattern（策略模式）- 具体策略实现
+ * ============================================
  * 
- * 具体策略类：当实时功率超过设备额定功率的一定比例时触发告警
+ * 角色：ConcreteStrategy（具体策略）
+ * 
+ * 职责：当实时功率超过设备额定功率的一定比例时触发告警
+ * 
+ * 判断逻辑：
+ * - 阈值 = 额定功率 × 过载比例（默认120%）
+ * - 当实时功率 > 阈值时，触发功率过载告警
+ * ============================================
  */
 @Component
 public class PowerOverloadAlertStrategy implements AlertStrategy {

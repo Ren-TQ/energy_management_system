@@ -17,13 +17,30 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * 能耗数据服务层
+ * ============================================
+ * MVC架构 - Model层（模型层）- 业务逻辑部分
+ * ============================================
+ * 
+ * 架构说明：
+ * 本类属于MVC架构中的Model（M）层，负责处理能耗数据相关的业务逻辑
+ * 
+ * MVC职责划分：
+ * - Controller (C): EnergyDataController - 接收请求
+ * - Model (M): 本类（Service层）- 处理业务逻辑
+ *              EnergyDataRepository - 数据访问
+ *              EnergyData实体 - 数据模型
+ * - View (V): Result<EnergyDataDTO> - JSON响应
+ * ============================================
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EnergyDataService {
     
+    // ============================================
+    // MVC架构 - Model层（模型层）- 数据访问部分
+    // Repository层：负责数据持久化，属于Model的一部分
+    // ============================================
     private final EnergyDataRepository energyDataRepository;
     
     /**

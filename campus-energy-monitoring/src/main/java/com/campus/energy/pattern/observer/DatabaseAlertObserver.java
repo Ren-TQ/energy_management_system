@@ -7,9 +7,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Pattern: Observer - 数据库存储观察者
+ * ============================================
+ * 设计模式：Observer Pattern（观察者模式）- 具体观察者
+ * ============================================
  * 
- * 具体观察者：负责将告警信息持久化到数据库
+ * 角色：ConcreteObserver（具体观察者）
+ * 
+ * 职责：当告警触发时，将告警信息持久化到数据库
+ * 
+ * 实现说明：
+ * 实现了AlertObserver接口，当AlertSubject通知时，
+ * 此观察者负责保存告警记录到数据库
+ * ============================================
  */
 @Slf4j
 @Component

@@ -18,6 +18,31 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
+ * ============================================
+ * 分层架构 - 安全层（Security Layer）- 过滤器层
+ * ============================================
+ * 
+ * 架构说明：
+ * 本类属于安全层架构中的过滤器层，负责JWT Token验证
+ * 
+ * 过滤器层特点：
+ * - 在请求到达Controller之前执行
+ * - 使用责任链模式（Chain of Responsibility）
+ * - 可以拦截和修改请求/响应
+ * 
+ * 在本项目中的应用：
+ * - 从HTTP请求头中提取JWT Token
+ * - 验证Token的有效性
+ * - 设置Spring Security认证上下文
+ * 
+ * 架构位置：
+ * - 位于HTTP请求和Controller层之间
+ * - 在SecurityConfig中配置为过滤器链的一部分
+ * 
+ * 数据流转：
+ * HTTP请求 → JwtAuthenticationFilter（本类）→ SecurityContext → Controller层
+ * ============================================
+ * 
  * JWT 认证过滤器
  * 从请求中提取JWT Token并进行验证
  */

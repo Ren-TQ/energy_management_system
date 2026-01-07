@@ -1,7 +1,6 @@
 package com.campus.energy.service;
 
 import com.campus.energy.dto.StatisticsDTO;
-import com.campus.energy.entity.Building;
 import com.campus.energy.enums.DeviceStatus;
 import com.campus.energy.repository.AlertRepository;
 import com.campus.energy.repository.BuildingRepository;

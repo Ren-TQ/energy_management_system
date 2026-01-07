@@ -12,6 +12,62 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * ============================================
+ * MVC架构 - Model层（模型层）- 数据模型部分
+ * ============================================
+ * 
+ * 架构说明：
+ * 本类属于MVC架构中的Model（M）层，负责：
+ * 1. 定义数据模型结构（对应数据库表）
+ * 2. 使用JPA注解映射数据库表
+ * 3. 封装业务数据
+ * 
+ * MVC职责划分：
+ * - Controller (C): DeviceController - 接收请求
+ * - Model (M): 本类（Entity实体）- 数据模型
+ *              DeviceService - 业务逻辑
+ *              DeviceRepository - 数据访问
+ * - View (V): Result<DeviceDTO> - JSON响应
+ * 
+ * 数据流转：
+ * 数据库表 ← JPA映射 → Device实体（本类）→ Service → Controller → DTO → JSON响应
+ * 
+ * 注意：
+ * - Entity不直接暴露给Controller，通过DTO传输
+ * - Entity用于Service层和Repository层之间的数据传递
+ * ============================================
+ * 
+ * ============================================
+ * 领域模型类型：贫血模型（Anemic Domain Model）
+ * ============================================
+ * 
+ * 模型说明：
+ * 本类采用贫血模型设计，特点如下：
+ * 
+ * 1. 只包含数据字段和getter/setter方法
+ * 2. 不包含业务逻辑方法（业务逻辑在Service层）
+ * 3. 使用Lombok的@Data自动生成getter/setter
+ * 4. 使用JPA注解进行数据映射
+ * 
+ * 业务逻辑位置：
+ * - 所有业务逻辑都在DeviceService层
+ * - Entity只负责数据存储和映射
+ * 
+ * 优势：
+ * - 结构简单，易于理解
+ * - 符合Spring/JPA的常见实践
+ * - 业务逻辑集中管理
+ * - 易于序列化和DTO转换
+ * 
+ * 示例：
+ * - 设备状态更新逻辑 → DeviceService.updateDeviceStatus()
+ * - 设备验证逻辑 → DeviceService.createDevice()
+ * - 设备查询逻辑 → DeviceService.getAllDevices()
+ * 
+ * 注意：
+ * 虽然Martin Fowler将贫血模型视为反模式，但在Spring项目中这是常见且合理的实践。
+ * ============================================
+ * 
  * 智能电表设备实体类
  * 用于存储智能电表设备的基本信息
  */

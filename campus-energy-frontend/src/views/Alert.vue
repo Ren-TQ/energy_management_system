@@ -1,3 +1,7 @@
+<!-- ============================================ -->
+<!-- MVVM架构 - View层 (视图层)                  -->
+<!-- 职责：负责UI展示和用户交互界面               -->
+<!-- ============================================ -->
 <template>
   <div class="alert-page">
     <div class="card-box">
@@ -126,11 +130,24 @@
   </div>
 </template>
 
+<!-- ============================================ -->
+<!-- MVVM架构 - ViewModel层 (视图模型层)         -->
+<!-- 职责：处理业务逻辑、状态管理、数据绑定       -->
+<!-- ============================================ -->
 <script setup>
+// 导入Vue核心功能
 import { ref, reactive, computed, onMounted } from 'vue'
+// 导入UI组件库
 import { ElMessage } from 'element-plus'
+// 导入日期处理库
 import dayjs from 'dayjs'
+// 导入状态管理（Pinia Store）
 import { useUserStore } from '@/stores/user'
+// ============================================
+// MVVM架构 - Model层 (数据模型层)
+// 职责：与后端API通信，获取和提交数据
+// 位置：@/api/alert.js
+// ============================================
 import { getAlerts, resolveAlert, getTodayAlertCount, getUnresolvedAlertCount } from '@/api/alert'
 
 const userStore = useUserStore()

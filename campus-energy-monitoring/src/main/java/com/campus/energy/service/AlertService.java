@@ -27,8 +27,11 @@ import java.util.stream.Collectors;
 /**
  * 告警服务层
  * 
- * Pattern: Strategy - 使用策略模式进行告警判断
- * Pattern: Observer - 使用观察者模式进行告警通知
+ * ============================================
+ * 设计模式应用：
+ * 1. Strategy Pattern（策略模式）- 使用策略模式进行告警判断
+ * 2. Observer Pattern（观察者模式）- 使用观察者模式进行告警通知
+ * ============================================
  */
 @Slf4j
 @Service
@@ -36,7 +39,18 @@ import java.util.stream.Collectors;
 public class AlertService {
     
     private final AlertRepository alertRepository;
+    
+    // ============================================
+    // 设计模式：Observer Pattern（观察者模式）
+    // 角色：Subject（主题），用于通知所有观察者
+    // ============================================
     private final AlertSubject alertSubject;
+    
+    // ============================================
+    // 设计模式：Strategy Pattern（策略模式）
+    // Spring自动注入所有实现了AlertStrategy接口的策略类
+    // 角色：Context（上下文），持有策略列表
+    // ============================================
     private final List<AlertStrategy> alertStrategies;
     
     @PostConstruct
@@ -48,11 +62,20 @@ public class AlertService {
     
     /**
      * 检查能耗数据是否触发告警
-     * Pattern: Strategy - 遍历所有策略进行告警判断
-     * Pattern: Observer - 触发告警时通知所有观察者
+     * 
+     * ============================================
+     * 设计模式：Strategy Pattern（策略模式）
+     * ============================================
+     * 遍历所有告警策略，每个策略独立判断是否需要告警
+     * 优势：新增告警类型只需添加新策略，无需修改此方法
+     * ============================================
      */
     @Transactional
     public void checkAndTriggerAlerts(Device device, EnergyData energyData) {
+        // ============================================
+        // 设计模式：Strategy Pattern（策略模式）
+        // 遍历所有策略，让每个策略独立判断
+        // ============================================
         for (AlertStrategy strategy : alertStrategies) {
             Optional<Alert> alertOpt = strategy.checkAlert(device, energyData);
             
@@ -60,8 +83,12 @@ public class AlertService {
                 Alert alert = alertOpt.get();
                 log.info("策略[{}]检测到异常，触发告警", strategy.getStrategyName());
                 
-                // 通知所有观察者（观察者模式）
-                // 注意：DatabaseAlertObserver会负责保存告警
+                // ============================================
+                // 设计模式：Observer Pattern（观察者模式）
+                // 通知所有观察者，观察者会执行各自的操作：
+                // - DatabaseAlertObserver：保存到数据库
+                // - LogAlertObserver：记录日志
+                // ============================================
                 alertSubject.notifyObservers(alert);
             }
         }

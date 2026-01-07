@@ -11,9 +11,19 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
- * Pattern: Strategy - 电压异常告警策略
+ * ============================================
+ * 设计模式：Strategy Pattern（策略模式）- 具体策略实现
+ * ============================================
  * 
- * 具体策略类：当电压偏离标准电压220V超过±10%时触发告警
+ * 角色：ConcreteStrategy（具体策略）
+ * 
+ * 职责：当电压偏离标准电压220V超过±10%时触发告警
+ * 
+ * 判断逻辑：
+ * - 正常范围：198V（220V的90%）- 242V（220V的110%）
+ * - 电压 < 198V：触发电压过低告警
+ * - 电压 > 242V：触发电压过高告警
+ * ============================================
  */
 @Component
 public class VoltageAbnormalAlertStrategy implements AlertStrategy {

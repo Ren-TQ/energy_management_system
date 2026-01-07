@@ -17,12 +17,33 @@ import org.springframework.stereotype.Component;
 /**
  * 数据初始化器
  * 在应用启动时初始化示例数据
+ * 
+ * ============================================
+ * 设计模式：Template Method Pattern（模板方法模式）
+ * ============================================
+ * 
+ * 模式说明：
+ * CommandLineRunner接口定义了run()方法作为模板方法，
+ * Spring Boot会在应用启动后自动调用此方法。
+ * 
+ * 实现方式：
+ * 实现CommandLineRunner接口，重写run()方法
+ * 
+ * 代码位置：
+ * - 接口：org.springframework.boot.CommandLineRunner
+ * - 实现：DataInitializer类
+ * ============================================
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
     
+    // ============================================
+    // 设计模式：Dependency Injection（依赖注入模式）
+    // Spring通过构造函数自动注入依赖
+    // 优势：解耦、易于测试、符合控制反转原则
+    // ============================================
     private final BuildingRepository buildingRepository;
     private final DeviceRepository deviceRepository;
     private final UserRepository userRepository;

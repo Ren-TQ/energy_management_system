@@ -1,3 +1,7 @@
+<!-- ============================================ -->
+<!-- MVVM架构 - View层 (视图层)                  -->
+<!-- 职责：负责UI展示和用户交互界面               -->
+<!-- ============================================ -->
 <template>
   <div class="login-container">
     <div class="login-card">
@@ -56,10 +60,19 @@
   </div>
 </template>
 
+<!-- ============================================ -->
+<!-- MVVM架构 - ViewModel层 (视图模型层)         -->
+<!-- 职责：处理业务逻辑、状态管理、数据绑定       -->
+<!-- ============================================ -->
 <script setup>
+// 导入Vue核心功能
 import { ref, reactive } from 'vue'
+// 导入路由
 import { useRouter } from 'vue-router'
+// 导入UI组件库
 import { ElMessage } from 'element-plus'
+// 导入状态管理（Pinia Store）
+// 注意：登录功能通过Store调用，Store内部会调用Model层的API
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()

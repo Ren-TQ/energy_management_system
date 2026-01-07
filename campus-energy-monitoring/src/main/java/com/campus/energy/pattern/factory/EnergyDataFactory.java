@@ -6,10 +6,31 @@ import com.campus.energy.entity.EnergyData;
 import java.time.LocalDateTime;
 
 /**
- * Pattern: Factory - 能耗数据工厂接口
+ * ============================================
+ * 设计模式：Factory Pattern（工厂模式）
+ * ============================================
+
+ * 模式说明：
+ * 定义一个创建对象的接口，让子类决定实例化哪一个类。
+ * 工厂模式使一个类的实例化延迟到其子类。
  * 
- * 工厂模式：定义一个创建对象的接口，让子类决定实例化哪一个类。
- * 此接口用于创建能耗数据对象，不同的工厂实现可以生成不同特征的能耗数据。
+ * 在此项目中的应用：
+ * - 接口：EnergyDataFactory（工厂接口）
+ * - 具体工厂：NormalEnergyDataFactory（正常数据工厂）
+ * - 具体工厂：AbnormalEnergyDataFactory（异常数据工厂）
+ * 
+ * 使用场景：
+ * 根据不同的需求（正常数据/异常数据）创建不同类型的EnergyData对象
+ * 
+ * 优势：
+ * 1. 解耦对象的创建和使用
+ * 2. 符合开闭原则，易于扩展新的工厂类型
+ * 3. 统一对象创建接口
+ * 
+ * 代码位置：
+ * - 工厂接口：com.campus.energy.pattern.factory.EnergyDataFactory
+ * - 使用位置：EnergySimulatorService.generateDataForDevice()
+ * ============================================
  */
 public interface EnergyDataFactory {
     

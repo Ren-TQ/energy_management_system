@@ -27,6 +27,32 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * ============================================
+ * 分层架构 - 安全层（Security Layer）
+ * ============================================
+ * 
+ * 架构说明：
+ * 本类属于横切关注点架构中的安全层，负责系统安全配置
+ * 
+ * 安全层架构特点：
+ * - 横切所有业务层
+ * - 在请求到达Controller之前进行安全验证
+ * - 使用过滤器链（Filter Chain）模式
+ * 
+ * 在本项目中的应用：
+ * - JWT Token验证（JwtAuthenticationFilter）
+ * - 请求授权配置
+ * - CORS跨域配置
+ * - 密码加密配置
+ * 
+ * 架构位置：
+ * - 位于HTTP请求和Controller层之间
+ * - 所有请求都会经过安全层验证
+ * 
+ * 数据流转：
+ * HTTP请求 → JWT过滤器 → Security配置 → Controller层
+ * ============================================
+ * 
  * Spring Security 安全配置
  */
 @Configuration
@@ -35,6 +61,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     
+    // ============================================
+    // 安全层组件：JWT认证过滤器
+    // 负责从请求中提取和验证JWT Token
+    // ============================================
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
     

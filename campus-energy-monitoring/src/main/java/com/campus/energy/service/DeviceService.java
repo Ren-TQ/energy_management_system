@@ -16,20 +16,85 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * ============================================
+ * MVC架构 - Model层（模型层）- 业务逻辑部分
+ * ============================================
+ * 
+ * 架构说明：
+ * 本类属于MVC架构中的Model（M）层，负责：
+ * 1. 处理业务逻辑（业务规则、数据验证、事务管理）
+ * 2. 调用Repository层访问数据
+ * 3. 实体与DTO之间的转换
+ * 
+ * MVC职责划分：
+ * - Controller (C): DeviceController - 接收请求
+ * - Model (M): 本类（Service层）- 处理业务逻辑
+ *              DeviceRepository - 数据访问
+ *              Device实体 - 数据模型
+ * - View (V): Result<DeviceDTO> - JSON响应
+ * 
+ * 数据流转：
+ * Controller → Service（本类）→ Repository → 数据库
+ *                ↓
+ *            Entity/DTO转换
+ *                ↓
+ * Controller ← Result<DTO>（View层）
+ * ============================================
+ * 
  * 设备信息服务层
+ * 
+ * ============================================
+ * 设计模式：Facade Pattern（外观模式）
+ * ============================================
+ * 
+ * 模式类型：结构型设计模式
+ * 
+ * 模式说明：
+ * 外观模式为子系统中的一组接口提供一个统一的高层接口。
+ * 它定义了一个更简单的接口，隐藏了子系统的复杂性。
+ * 
+ * 在此项目中的应用：
+ * - Facade：DeviceService（外观类）
+ * - Subsystem：DeviceRepository、BuildingRepository等
+ * 
+ * 优势：
+ * 1. 简化客户端调用，隐藏复杂的业务逻辑
+ * 2. 降低客户端与子系统的耦合度
+ * 3. 统一管理业务逻辑
+ * 
+ * 代码位置：
+ * - 所有Service类都实现了Facade模式
+ * - 使用位置：Controller层通过Service访问业务逻辑
+ * ============================================
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeviceService {
     
+    // ============================================
+    // MVC架构 - Model层（模型层）- 数据访问部分
+    // Repository层：负责数据持久化，属于Model的一部分
+    // ============================================
+    // ============================================
+    // 设计模式：Repository Pattern（仓储模式）
+    // Service层通过Repository访问数据，实现数据访问层与业务层分离
+    // ============================================
     private final DeviceRepository deviceRepository;
     private final BuildingRepository buildingRepository;
     
     /**
      * 获取所有设备列表
+     * 
+     * ============================================
+     * MVC架构体现：
+     * - Model层业务逻辑：调用Repository获取数据
+     * - 数据转换：Entity → DTO（准备返回给View层）
+     * ============================================
      */
     public List<DeviceDTO> getAllDevices() {
+        // MVC: Model层调用Repository（数据访问层）获取Entity
+        // MVC: 将Entity转换为DTO，准备返回给Controller（View层）
         return deviceRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -82,6 +147,15 @@ public class DeviceService {
                     building.getName(), dto.getRoomNumber()));
         }
         
+        // ============================================
+        // 设计模式：Builder Pattern（建造者模式）
+        // 使用Lombok的@Builder注解自动生成的建造者模式
+        // 
+        // 优势：
+        // 1. 链式调用，代码可读性强
+        // 2. 参数可选，避免构造函数参数过多
+        // 3. 对象创建过程清晰
+        // ============================================
         Device device = Device.builder()
                 .name(dto.getName())
                 .serialNumber(dto.getSerialNumber())
