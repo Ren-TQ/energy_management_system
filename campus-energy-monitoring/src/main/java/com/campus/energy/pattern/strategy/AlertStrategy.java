@@ -46,13 +46,6 @@ public interface AlertStrategy {
      * 1. 根据设备和能耗数据，判断是否符合告警条件
      * 2. 如果符合条件，构建并返回告警对象
      * 3. 如果不符合条件，返回Optional.empty()
-     * 
-
-     * @param device 设备信息，包含设备ID、名称、额定功率等
-     * @param energyData 能耗数据，包含电压、电流、功率等实时数据
-     * @return Optional<Alert> 
-     *         - 如果检测到异常，返回包含告警对象的Optional
-     *         - 如果未检测到异常，返回Optional.empty()
      *
      */
     Optional<Alert> checkAlert(Device device, EnergyData energyData);

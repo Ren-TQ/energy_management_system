@@ -26,27 +26,17 @@ import java.time.LocalDateTime;
  * 1. 解耦对象的创建和使用
  * 2. 符合开闭原则，易于扩展新的工厂类型
  * 3. 统一对象创建接口
- * 
- * 代码位置：
- * - 工厂接口：com.campus.energy.pattern.factory.EnergyDataFactory
- * - 使用位置：EnergySimulatorService.generateDataForDevice()
  * ============================================
  */
 public interface EnergyDataFactory {
     
     /**
      * 创建能耗数据
-     * 
-     * @param device 设备
-     * @param lastTotalEnergy 上次累计用电量
-     * @return 能耗数据对象
      */
     EnergyData createEnergyData(Device device, Double lastTotalEnergy);
     
     /**
      * 获取工厂名称
-     * 
-     * @return 工厂名称
      */
     String getFactoryName();
 }

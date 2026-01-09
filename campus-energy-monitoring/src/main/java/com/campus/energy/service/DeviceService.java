@@ -25,24 +25,6 @@ import java.util.stream.Collectors;
  * 1. 处理业务逻辑（业务规则、数据验证、事务管理）
  * 2. 调用Repository层访问数据
  * 3. 实体与DTO之间的转换
- * 
- * MVC职责划分：
- * - Controller (C): DeviceController - 接收请求
- * - Model (M): 本类（Service层）- 处理业务逻辑
- *              DeviceRepository - 数据访问
- *              Device实体 - 数据模型
- * - View (V): Result<DeviceDTO> - JSON响应
- * 
- * 数据流转：
- * Controller → Service（本类）→ Repository → 数据库
- *                ↓
- *            Entity/DTO转换
- *                ↓
- * Controller ← Result<DTO>（View层）
- * ============================================
- * 
- * 设备信息服务层
- * 
  * ============================================
  * 设计模式：Facade Pattern（外观模式）
  * ============================================
@@ -52,19 +34,7 @@ import java.util.stream.Collectors;
  * 模式说明：
  * 外观模式为子系统中的一组接口提供一个统一的高层接口。
  * 它定义了一个更简单的接口，隐藏了子系统的复杂性。
- * 
- * 在此项目中的应用：
- * - Facade：DeviceService（外观类）
- * - Subsystem：DeviceRepository、BuildingRepository等
- * 
- * 优势：
- * 1. 简化客户端调用，隐藏复杂的业务逻辑
- * 2. 降低客户端与子系统的耦合度
- * 3. 统一管理业务逻辑
- * 
- * 代码位置：
- * - 所有Service类都实现了Facade模式
- * - 使用位置：Controller层通过Service访问业务逻辑
+ *
  * ============================================
  */
 @Slf4j
@@ -73,30 +43,32 @@ import java.util.stream.Collectors;
 public class DeviceService {
     
     // ============================================
-    // MVC架构 - Model层（模型层）- 数据访问部分
-    // Repository层：负责数据持久化，属于Model的一部分
+    // 设计模式：Facade Pattern（外观模式）- 子系统
     // ============================================
+    // 
+    // 外观模式：子系统组件
+
+    // 子系统职责：
+    // - DeviceRepository：设备数据访问
+    // - BuildingRepository：建筑数据访问
+    // 
+    // 外观模式体现：
+    // - Service层封装了多个Repository的调用
+    // - Controller只需要调用Service的简单方法
+    // - 隐藏了Repository之间的复杂交互
     // ============================================
-    // 设计模式：Repository Pattern（仓储模式）
-    // Service层通过Repository访问数据，实现数据访问层与业务层分离
-    // ============================================
-    private final DeviceRepository deviceRepository;
-    private final BuildingRepository buildingRepository;
-    
-    /**
-     * 获取所有设备列表
-     * 
-     * ============================================
-     * MVC架构体现：
-     * - Model层业务逻辑：调用Repository获取数据
-     * - 数据转换：Entity → DTO（准备返回给View层）
-     * ============================================
-     */
+    private final DeviceRepository deviceRepository;  // 子系统：设备数据访问层
+    private final BuildingRepository buildingRepository;  // 子系统：建筑数据访问层
+
     public List<DeviceDTO> getAllDevices() {
+        // ============================================
+        // 外观模式：封装子系统调用
+        // 调用DeviceRepository（子系统）获取Entity列表
+        // ============================================
         // MVC: Model层调用Repository（数据访问层）获取Entity
         // MVC: 将Entity转换为DTO，准备返回给Controller（View层）
         return deviceRepository.findAll().stream()
-                .map(this::convertToDTO)
+                .map(this::convertToDTO)  // 外观模式：封装Entity到DTO的转换
                 .collect(Collectors.toList());
     }
     
@@ -127,20 +99,30 @@ public class DeviceService {
                 .collect(Collectors.toList());
     }
     
-    /**
-     * 创建设备
-     */
+
     @Transactional
     public DeviceDTO createDevice(DeviceDTO dto) {
+        // ============================================
+        // 外观模式：封装业务验证逻辑
+        // 调用子系统（DeviceRepository）进行验证
+        // ============================================
         // 检查序列号是否已存在
         if (deviceRepository.existsBySerialNumber(dto.getSerialNumber())) {
             throw new BusinessException("设备序列号已存在: " + dto.getSerialNumber());
         }
         
+        // ============================================
+        // 外观模式：封装子系统调用
+        // 调用子系统（BuildingRepository）获取建筑信息
+        // ============================================
         // 检查建筑是否存在
         Building building = buildingRepository.findById(dto.getBuildingId())
                 .orElseThrow(() -> new BusinessException("建筑不存在，ID: " + dto.getBuildingId()));
         
+        // ============================================
+        // 外观模式：封装业务验证逻辑
+        // 调用子系统（DeviceRepository）进行验证
+        // ============================================
         // 检查同一建筑同一房间是否已有设备（绑定关系约束）
         if (deviceRepository.existsByBuildingIdAndRoomNumber(dto.getBuildingId(), dto.getRoomNumber())) {
             throw new BusinessException(String.format("建筑[%s]的房间[%s]已绑定其他设备，同一房间只能绑定一个有效电表",
@@ -152,32 +134,7 @@ public class DeviceService {
         // ============================================
         // 
         // 建造者模式：使用链式调用创建Device对象
-        // 
-        // 执行流程：
-        // 1. Device.builder() - 创建Builder实例
-        // 2. 链式调用设置属性 - .name()、.serialNumber()等
-        // 3. .build() - 构建并返回Device对象
-        // 
-        // 建造者模式优势体现：
-        // - 链式调用：代码可读性强，对象创建过程清晰
-        // - 参数可选：可以只设置需要的属性，不需要的可以不设置
-        // - 避免构造函数参数过多：Device有很多属性，构造函数会很复杂
-        // - 易于维护：新增字段时，只需在builder()链中添加
-        // 
-        // 与构造函数对比：
-        // 构造函数方式（不推荐）：
-        //   new Device(null, dto.getName(), dto.getSerialNumber(), ...)
-        //   问题：参数过多，容易出错，可读性差
-        // 
-        // 建造者模式（推荐）：
-        //   Device.builder().name(...).serialNumber(...).build()
-        //   优势：链式调用，可读性强，参数可选
-        // 
-        // 代码说明：
-        // - 从DTO获取数据，转换为Entity对象
-        // - 设置默认值：如果status为null，默认为ONLINE
-        // - 关联对象：building对象已从数据库查询
-        // ============================================
+
         Device device = Device.builder()
                 .name(dto.getName())  // 设置设备名称
                 .serialNumber(dto.getSerialNumber())  // 设置设备序列号
@@ -270,34 +227,7 @@ public class DeviceService {
                 .orElseThrow(() -> new BusinessException("设备不存在，ID: " + id));
     }
     
-    /**
-     * 转换为DTO
-     * 
-     * ============================================
-     * 设计模式：Builder Pattern（建造者模式）
-     * ============================================
-     * 
-     * 建造者模式：使用链式调用创建DeviceDTO对象
-     * 
-     * 执行流程：
-     * 1. DeviceDTO.builder() - 创建Builder实例
-     * 2. 链式调用设置属性 - 从Entity对象获取数据并设置到DTO
-     * 3. .build() - 构建并返回DeviceDTO对象
-     * 
-     * 转换说明：
-     * - Entity转DTO：将Entity对象的属性转换为DTO对象的属性
-     * - 关联对象处理：将Building对象转换为buildingId和buildingName
-     * - 枚举转换：将DeviceStatus枚举转换为statusLabel字符串
-     * 
-     * 建造者模式优势体现：
-     * - 链式调用：代码可读性强，转换过程清晰
-     * - 参数可选：可以只设置需要的字段
-     * - 易于维护：新增字段时，只需在builder()链中添加
-     * 
-     * @param device Entity对象，包含完整的设备信息
-     * @return DeviceDTO对象，用于返回给Controller层
-     * ============================================
-     */
+
     private DeviceDTO convertToDTO(Device device) {
         // ============================================
         // 建造者模式：使用链式调用创建DTO对象

@@ -25,12 +25,49 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * 告警服务层
- * 
  * ============================================
- * 设计模式应用：
- * 1. Strategy Pattern（策略模式）- 使用策略模式进行告警判断
- * 2. Observer Pattern（观察者模式）- 使用观察者模式进行告警通知
+ * 设计模式：Facade Pattern（外观模式）
+ * ============================================
+ * 
+ * 模式类型：结构型设计模式
+ *
+ * 在此项目中的应用：
+ * - Facade（外观类）：AlertService（本类）
+ *   - 为Controller层提供简化的告警操作接口
+ *   - 隐藏了Repository、策略模式、观察者模式的复杂交互
+ *   - 封装了业务逻辑和数据转换
+ * 
+ * - Subsystem（子系统）：
+ *   - AlertRepository：告警数据访问层
+ *   - AlertStrategy（策略模式）：告警判断策略
+ *   - AlertSubject（观察者模式）：告警通知主题
+ *   - Entity/DTO转换逻辑
+ * 
+ * - Client（客户端）：AlertController
+ *   - 只需要调用Service的简单方法
+ *   - 不需要了解Repository、策略模式、观察者模式的复杂交互
+ * 
+ * 外观模式优势体现：
+ * 1. 简化客户端调用：
+ *    - Controller只需要调用alertService.getAllAlerts()
+ *    - 不需要知道内部调用了哪些Repository、策略、观察者
+ * 
+ * 2. 隐藏子系统复杂性：
+ *    - 封装了Repository、策略模式、观察者模式的交互
+ *    - 封装了Entity和DTO之间的转换逻辑
+ *    - 封装了业务逻辑（如告警检查、告警处理）
+ * 
+ * 3. 降低耦合度：
+ *    - Controller与Repository解耦
+ *    - Controller与策略模式解耦
+ *    - Controller与观察者模式解耦
+ * 
+ * 代码位置：
+ * - 外观类：com.campus.energy.service.AlertService（本类）
+ * - 子系统：com.campus.energy.repository.AlertRepository
+ * - 子系统：com.campus.energy.pattern.strategy.AlertStrategy
+ * - 子系统：com.campus.energy.pattern.observer.AlertSubject
+ * - 客户端：com.campus.energy.controller.AlertController
  * ============================================
  */
 @Slf4j
@@ -38,44 +75,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AlertService {
     
-    private final AlertRepository alertRepository;
+    // ============================================
+    // 设计模式：Facade Pattern（外观模式）- 子系统
+    // ============================================
+    // 
+    // 外观模式：子系统组件
+    // 
+    // 说明：
+    // AlertRepository是外观模式中的子系统组件
+    // AlertService（外观类）封装了Repository的调用
+    // Controller（客户端）不需要直接访问Repository
+    // ============================================
+    private final AlertRepository alertRepository;  // 子系统：告警数据访问层
     
     // ============================================
     // 设计模式：Observer Pattern（观察者模式）
     // 角色：Subject（主题），用于通知所有观察者
     // ============================================
     private final AlertSubject alertSubject;
-    
-    // ============================================
-    // 设计模式：Strategy Pattern（策略模式）
-    // ============================================
-    // 
-    // 角色：Context（上下文）
-    // 
-    // 说明：
-    // Spring通过依赖注入，自动将所有实现了AlertStrategy接口的Bean注入到此列表中
-    // 当前项目中的策略实现：
-    // 1. PowerOverloadAlertStrategy（功率过载策略）
-    // 2. VoltageAbnormalAlertStrategy（电压异常策略）
-    // 
-    // 策略模式优势体现：
-    // - 运行时动态获取所有策略，无需硬编码
-    // - 新增策略只需实现接口并添加@Component注解，自动生效
-    // - 符合开闭原则：对扩展开放，对修改关闭
-    // 
-    // 注入机制：
-    // Spring会自动扫描所有@Component注解且实现AlertStrategy接口的类
-    // 创建单例Bean并注入到此List中
-    // ============================================
     private final List<AlertStrategy> alertStrategies;
-    
-    /**
-     * 初始化方法：在Bean创建后执行
-     * 
-     * 策略模式体现：
-     * - 打印所有已加载的策略，便于调试和监控
-     * - 验证策略是否正确注入
-     */
     @PostConstruct
     public void init() {
         log.info("告警服务初始化，已加载 {} 个告警策略", alertStrategies.size());
@@ -89,17 +107,6 @@ public class AlertService {
      * 
      * ============================================
      * 设计模式：Strategy Pattern（策略模式）- 核心使用场景
-     * ============================================
-     * 
-     * 方法职责：
-     * 1. 遍历所有告警策略
-     * 2. 让每个策略独立判断是否需要告警
-     * 3. 如果策略检测到异常，触发告警通知（观察者模式）
-     * @param device 设备信息，传递给策略进行判断
-     * @param energyData 能耗数据，传递给策略进行判断
-     * 
-     * 调用位置：
-     * - EnergySimulatorService.generateDataForDevice() - 生成数据后检查告警
      * ============================================
      */
     @Transactional

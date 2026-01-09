@@ -73,30 +73,7 @@ public class EnergySimulatorService {
         log.info("模拟器状态: {}", simulatorEnabled ? "已启用" : "已禁用");
         log.info("异常数据频率: 每 {} 条正常数据生成1条异常数据", anomalyFrequency);
         log.info("============================================");
-        
-        // ============================================
-        // 设计模式：Observer Pattern（观察者模式）
-        // ============================================
-        // 
-        // 观察者模式：注册所有观察者到主题
-        // 
-        // 执行逻辑：
-        // 1. Spring自动注入所有实现了AlertObserver接口的Bean到alertObservers列表
-        // 2. 遍历所有观察者，注册到AlertSubject
-        // 3. AlertSubject会管理这些观察者，并在告警触发时通知它们
-        // 
-        // 当前项目中的观察者：
-        // - DatabaseAlertObserver：数据库存储观察者
-        // - LogAlertObserver：日志记录观察者
-        // 
-        // 观察者模式优势体现：
-        // - 自动发现：Spring自动注入所有观察者，无需手动添加
-        // - 动态注册：运行时注册，支持热插拔
-        // - 解耦：观察者和主题解耦，易于扩展
-        // 
-        // 注册流程：
-        // alertObservers列表 → 遍历 → 调用registerObserver() → AlertSubject管理
-        // ============================================
+
         alertObservers.forEach(alertSubject::registerObserver);
         log.info("已注册 {} 个告警观察者", alertSubject.getObserverCount());
     }

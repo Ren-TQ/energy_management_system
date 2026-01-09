@@ -69,16 +69,6 @@ public class PowerOverloadAlertStrategy implements AlertStrategy {
             // - 链式调用：代码可读性强，对象创建过程清晰
             // - 参数可选：可以只设置需要的属性
             // - 避免构造函数参数过多：Alert有很多属性，构造函数会很复杂
-            // 
-            // 与构造函数对比：
-            // 构造函数方式（不推荐）：
-            //   new Alert(null, device, AlertType.POWER_OVERLOAD, energyData.getPower(), threshold, description, false, null, null, LocalDateTime.now())
-            //   问题：参数过多，容易出错，可读性差
-            // 
-            // 建造者模式（推荐）：
-            //   Alert.builder().device(...).alertType(...).build()
-            //   优势：链式调用，可读性强，参数可选
-            // ============================================
             Alert alert = Alert.builder()
                     .device(device)  // 关联设备对象
                     .alertType(AlertType.POWER_OVERLOAD)  // 告警类型：功率过载

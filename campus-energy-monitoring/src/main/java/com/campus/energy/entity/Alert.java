@@ -35,10 +35,7 @@ import java.time.LocalDateTime;
 // - 使用Lombok的@Builder注解自动生成建造者
 // - 通过Alert.builder()创建Alert对象
 // - 主要用于策略模式中创建告警对象
-// 
-// 使用场景：
-// 1. 策略模式创建告警：PowerOverloadAlertStrategy、VoltageAbnormalAlertStrategy
-// 2. 测试代码：创建测试数据时使用
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
